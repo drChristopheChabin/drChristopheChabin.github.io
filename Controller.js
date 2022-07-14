@@ -29,7 +29,7 @@ class Controller {
         this.model.loadParam(textinput,iteration)
     }
     onFormValidate=()=>{
-        this.empty(document.querySelectorAll("table"))
+        this.empty(document.querySelectorAll(".balise"))
         this.view.displayMicro(this.model.getOperationsAgents)
         this.view.displayTEE(this.model.getOperationsComptes)
         this.view.displayTOF(this.model.getOperationsComptes)

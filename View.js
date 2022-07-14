@@ -4,16 +4,35 @@ class View {
         // The root element
         this.app = this.getElement('#root')
         this.app.setAttribute('class','row')
-        this.col0=this.createElement('div')
-        this.col1=this.createElement('div', 'col')
-        this.col2=this.createElement('div', 'col')
 
+        this.offcanvas=this.createElement('button')
+        this.offcanvas.setAttribute('class','btn btn-primary')
+        this.offcanvas.setAttribute('type','button')
+        this.offcanvas.setAttribute('data-bs-toggle','offcanvas')
+        this.offcanvas.setAttribute('data-bs-target','#offcanvasRight')
+        this.offcanvas.setAttribute('aria-controls','offcanvasRight')
+        this.offcanvas.textContent='Choisir un paramétrage'
+
+        this.col0=this.createElement('div')
+        this.col0.setAttribute('class','offcanvas offcanvas-end')
+        this.col0.setAttribute('tabindex','-1')
+        this.col0.setAttribute('id','offcanvasRight')
+        this.col0.setAttribute('aria-labelledby','offcanvasRightLabel')
+
+        this.col00=this.createElement('div','offcanvas-body')
+
+        this.col0.appendChild(this.col00)
+
+        this.col1=this.createElement('div', 'col')
+
+        this.col2=this.createElement('div')
+        this.col2.setAttribute('class','col display')
         // The title of the app
         this.title = this.createElement('h1')
         this.title.textContent = 'Modèle de Comptabilité Nationale'
 
         // Append the title, form to the app
-        this.app.append(this.title,this.col0,this.col1,this.col2)
+        this.app.append(this.title,this.offcanvas,this.col0,this.col1,this.col2)
     }
 
     // Create an element with an optional CSS class
@@ -31,13 +50,14 @@ class View {
 
     _generate_table(unagent, col = 4) {
         // creates a <table> element and a <tbody> element
-        this.tbl = this.createElement("table", 'tableaux');
-        this.tbl.setAttribute('id', 'table')
-        this.tblThead = this.createElement('thead');
+        this.tbl = this.createElement("table");
+        this.tbl.setAttribute('class', 'tableaux balise')
+        this.tblThead = this.createElement('thead','bg-light');
         this.tblBody = this.createElement("tbody");
 
         //parameter header table
         const rowh1 = document.createElement("tr");
+        rowh1.setAttribute('class','entreprise')
         const cellh1 = document.createElement("th");
         cellh1.setAttribute('scope', 'col')
         cellh1.setAttribute('colspan', '4')
@@ -47,6 +67,7 @@ class View {
 
         const rowh = document.createElement("tr");
         const cellh21 = document.createElement("th");
+        cellh21.setAttribute('class','entreprise')
         cellh21.setAttribute('scope', 'col')
         cellh21.setAttribute('colspan', '2')
         const cellTexth21 = document.createTextNode(`Actif`);
@@ -54,6 +75,7 @@ class View {
         rowh.appendChild(cellh21);
 
         const cellh22 = document.createElement("th");
+        cellh22.setAttribute('class','entreprise')
         cellh22.setAttribute('scope', 'col')
         cellh22.setAttribute('colspan', '2')
         const cellTexth22 = document.createTextNode(`Passif`);
@@ -102,12 +124,14 @@ class View {
 
     _generate_TEE(tab_TEE) {
         // creates a <table> element and a <tbody> element
-        this.tbl = this.createElement("table", 'tableaux');
-        this.tblThead = this.createElement('thead');
+        this.tbl = this.createElement("table");
+        this.tbl.setAttribute('class', 'tableaux balise')
+        this.tblThead = this.createElement('thead','bg-light');
         this.tblBody = this.createElement("tbody");
 
         //parameter header table
         const rowh1 = document.createElement("tr");
+        rowh1.setAttribute('class','entreprise')
         const cellh1 = document.createElement("th");
         cellh1.setAttribute('scope', 'col')
         cellh1.setAttribute('colspan', '8')
@@ -117,6 +141,7 @@ class View {
 
         const rowh2 = document.createElement("tr");
         const cellh21 = document.createElement("th");
+        cellh21.setAttribute('class','entreprise')
         cellh21.setAttribute('scope', 'col')
         cellh21.setAttribute('colspan', '4')
         const cellTexth21 = document.createTextNode(`Actif`);
@@ -124,6 +149,7 @@ class View {
         rowh2.appendChild(cellh21);
 
         const cellh22 = document.createElement("th");
+        cellh22.setAttribute('class','entreprise')
         cellh22.setAttribute('scope', 'col')
         cellh22.setAttribute('colspan', '4')
         const cellTexth22 = document.createTextNode(`Passif`);
@@ -199,12 +225,14 @@ class View {
 
     _generate_TOF(tab_TOF) {
         // creates a <table> element and a <tbody> element
-        this.tbl = this.createElement("table", 'tableaux');
-        this.tblThead = this.createElement('thead');
+        this.tbl = this.createElement("table");
+        this.tbl.setAttribute('class', 'tableaux balise')
+        this.tblThead = this.createElement('thead','bg-light');
         this.tblBody = this.createElement("tbody");
 
         //parameter header table
         const rowh1 = document.createElement("tr");
+        rowh1.setAttribute('class','entreprise')
         const cellh1 = document.createElement("th");
         cellh1.setAttribute('scope', 'col')
         cellh1.setAttribute('colspan', '8')
@@ -214,6 +242,7 @@ class View {
 
         const rowh2 = document.createElement("tr");
         const cellh21 = document.createElement("th");
+        cellh21.setAttribute('class','entreprise')
         cellh21.setAttribute('scope', 'col')
         cellh21.setAttribute('colspan', '4')
         const cellTexth21 = document.createTextNode(`Actif`);
@@ -221,6 +250,7 @@ class View {
         rowh2.appendChild(cellh21);
 
         const cellh22 = document.createElement("th");
+        cellh22.setAttribute('class','entreprise')
         cellh22.setAttribute('scope', 'col')
         cellh22.setAttribute('colspan', '4')
         const cellTexth22 = document.createTextNode(`Passif`);
@@ -259,8 +289,8 @@ class View {
     _generate_Operations(lesOperations, lesTypes) {
         //console.log(lesOperations.length)
         // creates a <table> element and a <tbody> element
-        this.tbl = this.createElement("table", 'table');
-        this.tbl.setAttribute('id', 'table')
+        this.tbl = this.createElement("table");
+        this.tbl.setAttribute('class', 'table balise')
         this.tblThead = this.createElement('thead');
         this.tblBody = this.createElement("tbody");
 
@@ -296,7 +326,7 @@ class View {
             // creating all cells
             const row = document.createElement("tr");
             if (eval(`lesTypes.${uneOperation.operation}`) === 'R') {
-                row.setAttribute('class', 'alert-warning')
+                row.setAttribute('class', 'table-warning')
             }
             const cell01 = this.createElement("td")
             const cellText01 = document.createTextNode(uneOperation.operation);
@@ -327,9 +357,6 @@ class View {
         this.col2.appendChild(this.tbl);
 
         return this.tbl
-    }
-    _generateOperationRow(uneOperation, lesTypes) {
-
     }
 
     generate_form() {
@@ -380,27 +407,30 @@ class View {
         this.input4.name = 'mtAmortit'
         this.input4.id = 'mtAmortit'
 
-        this.submitButton = this.createElement('button', 'btn')
-        this.submitButton.setAttribute('class', 'btn-primary')
+        this.submitButton = this.createElement('button')
+        this.submitButton.setAttribute('class', 'btn btn-primary')
+        this.submitButton.setAttribute('data-bs-dismiss', 'offcanvas')
         this.submitButton.type = 'submit'
         this.submitButton.textContent = 'Envoyer'
         this.submitButton.id = 'envoyer'
 
-        this.razButton = this.createElement('button', 'btn')
-        this.razButton.setAttribute('class', 'btn-warning')
+        this.razButton = this.createElement('button')
+        this.razButton.setAttribute('class', 'btn btn-warning')
+        this.razButton.setAttribute('data-bs-dismiss', 'offcanvas')
         this.razButton.type = 'reset'
         this.razButton.textContent = 'RAZ'
         this.razButton.id = 'raz'
 
-        this.pasApasButton = this.createElement('button', 'btn')
-        this.pasApasButton.setAttribute('class', 'btn-primary')
+        this.pasApasButton = this.createElement('button')
+        this.pasApasButton.setAttribute('class', 'btn btn-primary')
+        //this.pasApasButton.setAttribute('data-bs-dismiss', 'offcanvas')
         this.pasApasButton.type = 'submit'
         this.pasApasButton.textContent = 'Pas à Pas'
         this.pasApasButton.id = 'pasApas'
 
         this.form.append(div, this.label1, this.input1, this.label2, this.input2, this.label3, this.input3, this.label4,
             this.input4, this.submitButton, this.razButton, this.pasApasButton)
-        this.col0.appendChild(this.form);
+        this.col00.appendChild(this.form);
     }
 
     get _agregatData() {

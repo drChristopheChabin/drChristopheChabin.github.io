@@ -3,8 +3,17 @@
     vertical-align:top;
     padding-right: 20px;
 }
+.tableaux thead{
+    border-bottom: solid;
+}
+.entreprise{
+   text-align:center;
+}
 td{
     padding-right: 10px;
+}
+.bord{
+    border-right: solid;
 }
 .value{
     color: red;
@@ -13,4 +22,8 @@ td{
 }
 .key{
     text-transform: capitalize;
+}
+.display{
+    height:700px;
+    overflow:auto;
 }
