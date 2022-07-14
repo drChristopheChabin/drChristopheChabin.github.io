@@ -21,9 +21,17 @@ class View {
 
         this.col00=this.createElement('div','offcanvas-body')
 
+        this.closeButton = this.createElement('button')
+        this.closeButton.setAttribute('class', 'btn-close')
+        this.closeButton.setAttribute('data-bs-dismiss', 'offcanvas')
+        this.closeButton.type = 'button'
+        this.col00.appendChild(this.closeButton)
+
+
         this.col0.appendChild(this.col00)
 
-        this.col1=this.createElement('div', 'col')
+        this.col1=this.createElement('div')
+        this.col1.setAttribute('class','col')
 
         this.col2=this.createElement('div')
         this.col2.setAttribute('class','col display')
