@@ -51,6 +51,12 @@ class Banque {
         //console.log(this.#bilan)
         return this.#bilan;
     }*/
+    get getBCactif(){
+        return this.#actif.BC
+    }
+    get getBCpassif(){
+        return this.#passif.BC
+    }
     get getBilan() {
         this.#bilan = [];
         let i = 0

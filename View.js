@@ -3,23 +3,23 @@ class View {
         this._iteration = -1
         // The root element
         this.app = this.getElement('#root')
-        this.app.setAttribute('class','row')
+        this.app.setAttribute('class', 'row')
 
-        this.offcanvas=this.createElement('button')
-        this.offcanvas.setAttribute('class','btn btn-primary')
-        this.offcanvas.setAttribute('type','button')
-        this.offcanvas.setAttribute('data-bs-toggle','offcanvas')
-        this.offcanvas.setAttribute('data-bs-target','#offcanvasRight')
-        this.offcanvas.setAttribute('aria-controls','offcanvasRight')
-        this.offcanvas.textContent='Choisir un paramétrage'
+        this.offcanvas = this.createElement('button')
+        this.offcanvas.setAttribute('class', 'btn btn-primary')
+        this.offcanvas.setAttribute('type', 'button')
+        this.offcanvas.setAttribute('data-bs-toggle', 'offcanvas')
+        this.offcanvas.setAttribute('data-bs-target', '#offcanvasRight')
+        this.offcanvas.setAttribute('aria-controls', 'offcanvasRight')
+        this.offcanvas.textContent = 'Choisir un paramétrage'
 
-        this.col0=this.createElement('div')
-        this.col0.setAttribute('class','offcanvas offcanvas-end')
-        this.col0.setAttribute('tabindex','-1')
-        this.col0.setAttribute('id','offcanvasRight')
-        this.col0.setAttribute('aria-labelledby','offcanvasRightLabel')
+        this.col0 = this.createElement('div')
+        this.col0.setAttribute('class', 'offcanvas offcanvas-end')
+        this.col0.setAttribute('tabindex', '-1')
+        this.col0.setAttribute('id', 'offcanvasRight')
+        this.col0.setAttribute('aria-labelledby', 'offcanvasRightLabel')
 
-        this.col00=this.createElement('div','offcanvas-body')
+        this.col00 = this.createElement('div', 'offcanvas-body')
 
         this.closeButton = this.createElement('button')
         this.closeButton.setAttribute('class', 'btn-close')
@@ -30,17 +30,17 @@ class View {
 
         this.col0.appendChild(this.col00)
 
-        this.col1=this.createElement('div')
-        this.col1.setAttribute('class','col')
+        this.col1 = this.createElement('div')
+        this.col1.setAttribute('class', 'col')
 
-        this.col2=this.createElement('div')
-        this.col2.setAttribute('class','col display')
+        this.col2 = this.createElement('div')
+        this.col2.setAttribute('class', 'col display')
         // The title of the app
         this.title = this.createElement('h1')
         this.title.textContent = 'Modèle de Comptabilité Nationale'
 
         // Append the title, form to the app
-        this.app.append(this.title,this.offcanvas,this.col0,this.col1,this.col2)
+        this.app.append(this.title, this.offcanvas, this.col0, this.col1, this.col2)
     }
 
     // Create an element with an optional CSS class
@@ -60,12 +60,12 @@ class View {
         // creates a <table> element and a <tbody> element
         this.tbl = this.createElement("table");
         this.tbl.setAttribute('class', 'tableaux balise')
-        this.tblThead = this.createElement('thead','bg-light');
+        this.tblThead = this.createElement('thead', 'bg-light');
         this.tblBody = this.createElement("tbody");
 
         //parameter header table
         const rowh1 = document.createElement("tr");
-        rowh1.setAttribute('class','entreprise')
+        rowh1.setAttribute('class', 'entreprise')
         const cellh1 = document.createElement("th");
         cellh1.setAttribute('scope', 'col')
         cellh1.setAttribute('colspan', '4')
@@ -75,7 +75,7 @@ class View {
 
         const rowh = document.createElement("tr");
         const cellh21 = document.createElement("th");
-        cellh21.setAttribute('class','entreprise')
+        cellh21.setAttribute('class', 'entreprise')
         cellh21.setAttribute('scope', 'col')
         cellh21.setAttribute('colspan', '2')
         const cellTexth21 = document.createTextNode(`Actif`);
@@ -83,7 +83,7 @@ class View {
         rowh.appendChild(cellh21);
 
         const cellh22 = document.createElement("th");
-        cellh22.setAttribute('class','entreprise')
+        cellh22.setAttribute('class', 'entreprise')
         cellh22.setAttribute('scope', 'col')
         cellh22.setAttribute('colspan', '2')
         const cellTexth22 = document.createTextNode(`Passif`);
@@ -100,7 +100,7 @@ class View {
             for (let j = 0; j < col / 2; j++) {
                 // Create a <td> element and a text node, make the text
                 // node the contents of the <td>, and put the <td> at
-                // the end of the table row2)
+                // the end of the table row2
                 const lgn = Object.keys(unagent.getBilan[i][j % 2])
 
                 this.cell0 = this.createElement("td", 'key');
@@ -134,12 +134,12 @@ class View {
         // creates a <table> element and a <tbody> element
         this.tbl = this.createElement("table");
         this.tbl.setAttribute('class', 'tableaux balise')
-        this.tblThead = this.createElement('thead','bg-light');
+        this.tblThead = this.createElement('thead', 'bg-light');
         this.tblBody = this.createElement("tbody");
 
         //parameter header table
         const rowh1 = document.createElement("tr");
-        rowh1.setAttribute('class','entreprise')
+        rowh1.setAttribute('class', 'entreprise')
         const cellh1 = document.createElement("th");
         cellh1.setAttribute('scope', 'col')
         cellh1.setAttribute('colspan', '8')
@@ -149,7 +149,7 @@ class View {
 
         const rowh2 = document.createElement("tr");
         const cellh21 = document.createElement("th");
-        cellh21.setAttribute('class','entreprise')
+        cellh21.setAttribute('class', 'entreprise')
         cellh21.setAttribute('scope', 'col')
         cellh21.setAttribute('colspan', '4')
         const cellTexth21 = document.createTextNode(`Actif`);
@@ -157,7 +157,7 @@ class View {
         rowh2.appendChild(cellh21);
 
         const cellh22 = document.createElement("th");
-        cellh22.setAttribute('class','entreprise')
+        cellh22.setAttribute('class', 'entreprise')
         cellh22.setAttribute('scope', 'col')
         cellh22.setAttribute('colspan', '4')
         const cellTexth22 = document.createTextNode(`Passif`);
@@ -206,7 +206,7 @@ class View {
                 for (let j = 0; j < 3; j++) {
                     // Create a <td> element and a text node, make the text
                     // node the contents of the <td>, and put the <td> at
-                    // the end of the table row2)
+                    // the end of the table row2
                     let m = j + (n * 3)
 
                     const value = tab_TEE[i][m][1]
@@ -235,12 +235,12 @@ class View {
         // creates a <table> element and a <tbody> element
         this.tbl = this.createElement("table");
         this.tbl.setAttribute('class', 'tableaux balise')
-        this.tblThead = this.createElement('thead','bg-light');
+        this.tblThead = this.createElement('thead', 'bg-light');
         this.tblBody = this.createElement("tbody");
 
         //parameter header table
         const rowh1 = document.createElement("tr");
-        rowh1.setAttribute('class','entreprise')
+        rowh1.setAttribute('class', 'entreprise')
         const cellh1 = document.createElement("th");
         cellh1.setAttribute('scope', 'col')
         cellh1.setAttribute('colspan', '8')
@@ -250,7 +250,7 @@ class View {
 
         const rowh2 = document.createElement("tr");
         const cellh21 = document.createElement("th");
-        cellh21.setAttribute('class','entreprise')
+        cellh21.setAttribute('class', 'entreprise')
         cellh21.setAttribute('scope', 'col')
         cellh21.setAttribute('colspan', '4')
         const cellTexth21 = document.createTextNode(`Actif`);
@@ -258,7 +258,7 @@ class View {
         rowh2.appendChild(cellh21);
 
         const cellh22 = document.createElement("th");
-        cellh22.setAttribute('class','entreprise')
+        cellh22.setAttribute('class', 'entreprise')
         cellh22.setAttribute('scope', 'col')
         cellh22.setAttribute('colspan', '4')
         const cellTexth22 = document.createTextNode(`Passif`);
@@ -329,7 +329,7 @@ class View {
         rowh1.appendChild(cellh14);
 
         this.tblThead.append(rowh1)
-        let flag = true
+
         for (let uneOperation of lesOperations) {
             // creating all cells
             const row = document.createElement("tr");
@@ -415,6 +415,42 @@ class View {
         this.input4.name = 'mtAmortit'
         this.input4.id = 'mtAmortit'
 
+        this.label5 = this.createElement('label', 'form-label')
+        this.label5.setAttribute('for', 'xport')
+        this.label5.textContent = 'Montant des Exportations'
+
+        this.input5 = this.createElement('input', 'form-control')
+        this.input5.type = 'text'
+        this.input5.placeholder = '6'
+        this.input5.defaultValue = 6
+        this.input5.name = 'xport'
+        this.input5.id = 'xport'
+
+        this.label6 = this.createElement('label', 'form-label')
+        this.label6.setAttribute('for', 'mport')
+        this.label6.textContent = 'Montant des Importations'
+
+        this.input6 = this.createElement('input', 'form-control')
+        this.input6.type = 'text'
+        this.input6.placeholder = '7'
+        this.input6.defaultValue = 7
+        this.input6.name = 'mport'
+        this.input6.id = 'mport'
+
+        this.divcheck=this.createElement('div', 'form-check')
+
+        this.input7 = this.createElement('input', 'form-check-input')
+        this.input7.type = 'checkbox'
+        this.input7.name = 'mInter'
+        this.input7.id = 'mInter'
+
+        this.label7 = this.createElement('label', 'form-check-label')
+        this.label7.setAttribute('for', 'mInter')
+        this.label7.textContent = 'La monnaie du pays est monnaie internationale'
+
+        this.divcheck.appendChild(this.input7)
+        this.divcheck.appendChild(this.label7)
+
         this.submitButton = this.createElement('button')
         this.submitButton.setAttribute('class', 'btn btn-primary')
         this.submitButton.setAttribute('data-bs-dismiss', 'offcanvas')
@@ -437,11 +473,13 @@ class View {
         this.pasApasButton.id = 'pasApas'
 
         this.form.append(div, this.label1, this.input1, this.label2, this.input2, this.label3, this.input3, this.label4,
-            this.input4, this.submitButton, this.razButton, this.pasApasButton)
+            this.input4, this.label5, this.input5, this.label6, this.input6, this.divcheck,
+            this.submitButton, this.razButton, this.pasApasButton)
         this.col00.appendChild(this.form);
     }
 
     get _agregatData() {
+       // console.log(document.querySelectorAll("input"))
         return document.querySelectorAll("input")
     }
 
@@ -498,4 +536,5 @@ class View {
     }
 
 }
-export{View}
+
+export {View}

@@ -1,13 +1,16 @@
 import {Operation} from './metier/Operation.js'
-import{ComptaNat} from './metier/ComptaNat.js'
-import{Framework} from './metier/Framework.js'
-class Model {
+import {ComptaNat} from './metier/ComptaNat.js'
+import {Framework} from './metier/Framework.js'
+/**
+ *
+ * @property {Object} _operation
+ * @property {Object} _staticList
+ * @property {Object} _agentsList
+ * @property {Object} model
+ * @property {Object} _lesOperations
+ */
 
-    model;
-    _operation;
-    _agentsList;
-    _staticList;
-    _lesOperations
+class Model {
 
     constructor() {
 
@@ -26,10 +29,10 @@ class Model {
     }
 
     loadParam(param, iteration) {
-        this._iteration=iteration
+        this._iteration = iteration
 
         for (let i = 0; i < param.length; i++) {
-            //console.log(`${param[i].name}:${param[i].value}`)
+          //  console.log(`${param[i].name}:${param[i].value}`)
 
             switch (param[i].name) {
                 case 'mtE1':
@@ -44,6 +47,15 @@ class Model {
                 case 'mtAmortit':
                     this._mtAmortit = param[i].value | 0;
                     break;
+                case'xport':
+                    this._xport = param[i].value | 0;
+                    break;
+                case'mport':
+                    this._mport = param[i].value | 0;
+                    break;
+                case'mInter':
+                    this._mInter = param[i].checked;
+                    break;
             }
         }
         if (this._iteration === -1) {
@@ -51,13 +63,14 @@ class Model {
         } else {
             this._validerBilanPasApas()
         }
+        this._operationInterbancaireCentrale()
 
         this._onFormValidate()
     }
 
     _loadFramework() {
         let choix = 'getListProfit'
-        this.model = new Framework(this._mtE1, this._mtE2, this._txProfit, this._mtAmortit);
+        this.model = new Framework(this._mtE1, this._mtE2, this._txProfit, this._mtAmortit, this._xport, this._mport);
         // console.log(eval(`this.model.${choix}()`))
         return this._lesOperations = eval(`this.model.${choix}()`);
 
@@ -90,21 +103,21 @@ class Model {
         let vendeur = ''
         const lesOperations = this._loadFramework()
 
-        if(this._iteration<lesOperations.length) {
-            const uneOperation=lesOperations[this._iteration]
+        if (this._iteration < lesOperations.length) {
+            const uneOperation = lesOperations[this._iteration]
             acheteur = this._operation.find(uneOperation.acheteur)
             vendeur = this._operation.find(uneOperation.vendeur)
             this._validerOperation(uneOperation.operation, acheteur, vendeur, uneOperation.montant)
-        }
-        else{
+        } else {
             this._iteration = -1
         }
         //console.log(this._operation.getInfos)
     }
-    _listOperationPasApas(){
-        let lesOperationsPasApas=[]
-        for(let i=0;i<this._iteration+1;i++){
-            lesOperationsPasApas[i]=this._lesOperations[i]
+
+    _listOperationPasApas() {
+        let lesOperationsPasApas = []
+        for (let i = 0; i < this._iteration + 1; i++) {
+            lesOperationsPasApas[i] = this._lesOperations[i]
         }
         return lesOperationsPasApas
     }
@@ -120,9 +133,9 @@ class Model {
     }
 
     get getLesOperations() {
-        if(this._iteration===-1){
+        if (this._iteration === -1) {
             return this._lesOperations
-        }else{
+        } else {
             return this._listOperationPasApas()
         }
 
@@ -130,6 +143,25 @@ class Model {
 
     get getLesTypes() {
         return this.model.getTypes
+    }
+
+    _operationInterbancaireCentrale() {
+        const banque = this._operation.find('B')
+        const montant = banque.getBCpassif - banque.getBCactif
+
+        if (montant > 0 && !this._mInter) {
+            const acheteur = this._operation.find('Rdm')
+            const vendeur = this._operation.find('E3')
+            //Achat de titre au pays débiteur
+           // this._validerOperation('AchatTitres', acheteur, vendeur, montant)
+            //Paiement de la position débitrice du pays
+            this._validerOperation('Paiement', acheteur, vendeur, montant)
+        }else if(montant > 0 && this._mInter){
+            //Réescompte du titre pour la position débitrice
+            const acheteur = this._operation.find('E1')
+            //Escompte du titre auprès de la banque centrale
+            this._validerOperation('ReEscompte', acheteur, 'BC', montant)
+        }
     }
 
     afficheroperation() {
@@ -159,4 +191,5 @@ class Model {
         }
     }
 }
-export{Model}
+
+export {Model}

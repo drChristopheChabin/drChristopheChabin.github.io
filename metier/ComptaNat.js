@@ -89,7 +89,7 @@ class ComptaNat {
         'Ext': 0
     };
     #passif_TOF = {
-        'bC': 0,
+        'bc': 0,
         'e': 0,
         'm': 0,
         'ext': 0

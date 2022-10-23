@@ -1,6 +1,7 @@
 import {ComptaNat} from './ComptaNat.js'
 import {Entreprise} from './Entreprise.js'
 import {Banque} from './Banque.js'
+
 class Operation {
 
     _agentsList;
@@ -14,6 +15,7 @@ class Operation {
         this._operationList = new Set();
         this._InitialiseOperation();
         this._CN = new ComptaNat();
+        this.banque = new Banque();
         this.getAgents;
     }
 
@@ -55,9 +57,8 @@ class Operation {
         this._operationList.add('RevenusNonSal');
         this._operationList.add('RemboursementBq');
         this._operationList.add('Paiement');
-        this._operationList.add('FiReglementInt');
         this._operationList.add('Credit');
-        this._operationList.add('EscompteInternational');
+        this._operationList.add('ReEscompte');
     }
 
     get getOperation() {
@@ -92,7 +93,7 @@ class Operation {
         let validation = "Le vendeur doit être M";
         if (vdr.getNom === 'M') {
             ach.Production(vdr, mt);
-           //console.log(ach.getBilan)
+            //console.log(ach.getBilan)
             //console.log(vdr.getBilan)
             //  CHARGEMENT DE LA SESSION
             this.getCN;
@@ -109,7 +110,6 @@ class Operation {
     ConsommationIntermediaire(ach, vdr, mt, txPrf = 0) {
         let validation = "M ne peut pas figurer dans cette opération";
         if (vdr.getNom !== 'M' && ach.getNom !== 'M') {
-            //console.log(ach)
             ach.CI(vdr, mt);
             this.getCN;
             if (ach.getNom === "Rdm") {
@@ -303,28 +303,26 @@ class Operation {
     }
 
     Paiement(ach, vdr, mt) {
-        let validation, bq;
-        bq = new Banque(ach)
+        let validation, bqv, bqa;
+        bqv = this.find(vdr.getBanque);
+        bqa = this.find(ach.getBanque);
         if (ach.getBanque === vdr.getBanque) {
             // console.log(ach.getBanque)
-            bq = this.find(ach.getBanque)
-            bq.BanqueFinPassif(vdr.getNom, mt);
-            bq.BanqueFinPassif(ach.getNom, -1 * mt);
-        } else if (vdr.getNom === 'Rdm') {
-            bq = this._agentsList.findSet(vdr.getBanque);
-            bq.BanqueFinPassif('BC', mt);
-            bq.BanqueFinPassif(ach.getNom, -1 * mt);
-        } else {
-            bq = this._agentsList.findSet(vdr.getBanque);
-            bq.BanqueFinPassif(vdr.getNom, mt);
-            bq.BanqueFinActif('BC', mt);
+            bqa = this.find(ach.getBanque)
+            bqv.BanqueFinPassif(vdr.getNom, mt);
+            bqa.BanqueFinPassif(ach.getNom, -1 * mt);
+        } else if (vdr.getNom === 'Rdm' || ach.getNom === 'Rdm') {
+            bqa.BanqueFinPassif('BC', mt);
+            bqa.BanqueFinPassif(ach.getNom, -1 * mt);
+            bqv.BanqueFinPassif(vdr.getNom, mt);
+            bqv.BanqueFinActif('BC', mt);
         }
 
         this.getCN;
         this._CN.actif_TOF(ach.getColonneTOF, mt, -1);
         this._CN.actif_TOF(vdr.getColonneTOF, mt, 1);
         this._CN.getBilanTOF();
-        //this.Session.setAttribut('cn', this._CN);
+
 
         validation = true;
 
@@ -332,12 +330,15 @@ class Operation {
     }
 
     Credit(ach, vdr, mt) {
-        let validation, bqv, bqa;
+        let validation, bqv, bqa, ptof, atof;
         bqv = this.find(vdr.getBanque);
         bqa = this.find(ach.getBanque);
         if (ach.getBanque === vdr.getBanque) {
             bqa.BanqueFinActif(ach.getNom, mt);
             bqa.BanqueFinPassif(vdr.getNom, mt);
+
+            ptof = ach.getColonneTOF
+            atof = vdr.getColonneTOF
         } else if (vdr.getNom === 'Rdm') {
 
             bqa.BanqueFinPassif('BC', mt);
@@ -345,6 +346,9 @@ class Operation {
 
             bqv.BanqueFinPassif('Rdm', mt);
             bqv.BanqueFinActif('BC', mt);
+
+            ptof = ach.getColonneTOF
+            atof = 'BC'
         } else {
 
             bqv.BanqueFinPassif(vdr.getNom, mt);
@@ -352,65 +356,63 @@ class Operation {
 
             bqa.BanqueFinPassif('BC', mt);
             bqa.BanqueFinActif('Rdm', mt);
+
+            ptof = 'BC'
+            atof = vdr.getColonneTOF
         }
 
         this.getCN;
-        this._CN.passif_TOF(ach.getColonneTOF, mt, 1);
-        this._CN.actif_TOF(vdr.getColonneTOF, mt, 1);
+        this._CN.passif_TOF(ptof, mt, 1);
+        this._CN.actif_TOF(atof, mt, 1);
         this._CN.getBilanTOF();
         validation = true;
 
         return validation;
     }
 
-    FiReglementInt(ach, vdr, mt) {
-        let validation, bqv;
-        validation = "Acht = Bdm";
-        if (ach.getNom === 'Bdm') {
-            vdr = this.find('E3');
-            bqv = this.find(vdr.getBanque);
-            vdr.FiReglement(vdr, mt);
-            bqv.BanqueFinPassif(vdr.getNom, mt);
-            bqv.BanqueFinActif('BC', mt);
-
-            ach.BanqueFinActif('Bdm', mt);
-            ach.BanqueFinPassif('BC', mt);
+    ReEscompte(ach, vdr = 'BC', mt) {
+        let validation, bqa;
+        validation = "Acht = BC";
+        bqa = this.find(ach.getBanque);
+        if (ach.getColonneTOF === 'E') {
+            bqa.BanqueFinActif(ach.getNom, -mt);
+            bqa.BanqueFinActif('BC', mt);
 
             this.getCN;
-            this._CN.actif_TOF('Ext', mt, 1);
-            this._CN.passif_TOF(vdr.getColonneTOF, mt, 1);
+            this._CN.passif_TOF('BC', mt, 1);
+            this._CN.passif_TOF(ach.getColonneTOF, mt, -1);
             this._CN.getBilanTOF();
-            this.Session.setAttribut('cn', this._CN);
 
             validation = true;
         }
         return validation;
     }
 
-    EscompteInternational(ach, vdr, mt) {
-        let validation, bqv, bqi;
-        validation = "Acht = B";
-        if (ach.getNom === 'B') {
-            bqv = this.find(vdr.getBanque);
-            bqi = this.find('Brm');
-            bqv.BanqueFinActif(vdr.getNom, -1 * mt);
-            bqv.BanqueFinActif('BC', mt);
+    /* EscompteInternational(ach, vdr, mt) {
+         let validation, bqv, bqi;
+         validation = "Acht = B";
+         if (ach.getNom === 'B') {
+             bqv = this.find(vdr.getBanque);
+             bqi = this.find('Brm');
+             bqv.BanqueFinActif(vdr.getNom, -1 * mt);
+             bqv.BanqueFinActif('BC', mt);
 
-            bqi.BanqueFinActif(ach.getNom, mt);
-            bqi.BanqueFinPassif('BC', mt);
+             bqi.BanqueFinActif(ach.getNom, mt);
+             bqi.BanqueFinPassif('BC', mt);
 
-            this.getCN;
-            this._CN.actif_TOF('BC', mt, 1);
-            this._CN.passif_TOF(vdr.getColonneTOF, mt, 1);
-            this._CN.getBilanTOF();
-            //this.Session.setAttribut('cn', this._CN);
+             this.getCN;
+             this._CN.actif_TOF('BC', mt, 1);
+             this._CN.passif_TOF(vdr.getColonneTOF, mt, 1);
+             this._CN.getBilanTOF();
+             //this.Session.setAttribut('cn', this._CN);
 
-            validation = true;
-        }
+             validation = true;
+         }
 
-        return validation;
-    }
+         return validation;
+     }*/
 
 
 }
-export{Operation}
+
+export {Operation}

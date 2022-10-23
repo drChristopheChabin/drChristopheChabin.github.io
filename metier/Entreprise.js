@@ -12,8 +12,7 @@ class Entreprise {
         this._achtr = achtr;
         this.#_colonneTof = colonneTof;
         //Bdm est l'établissement financier de Bqm
-        if (this._achtr === 'Rdm' &&
-            this._achtr === 'Bdm') {
+        if (this._achtr === 'Rdm') {
             this.#_bqLoc = 'Bdm';
         } else {
             this.#_bqLoc = 'B';
@@ -77,8 +76,8 @@ class Entreprise {
     }
 
     _Stock(mont, sign) {
-        this.#actif.St += sign * mont;
-        return this.#actif.St;
+        this.#actif['St'] += sign * mont;
+       //
     }
 
     Banque(mont, sign) {
@@ -138,14 +137,17 @@ class Entreprise {
     _Salaire(mont, sign) {
         this.#passif.Sal += sign * mont;
     }
+    get getStocks(){
+        return this.#actif.St;
+    }
 
     /***************Fonctions public*****************************/
     Production(vd, mt, txPrf = 0) {
 
         if (this._achtr !== 'M') {
 
-            const stock = this._Stock(mt, 1);
-            if (stock < 0) {
+            this._Stock(mt, 1);
+            if (this.getStocks < 0) {
                 this.#actif.St = 0;
             }
             this._Salaire(mt, 1);
@@ -161,16 +163,18 @@ class Entreprise {
 
     CI(vd, mt, txPrf = 0) {
         //Il faut nécessairement (en raison de la prog) que les agents soient des entreprises
-        const stock = this._Stock(mt, 1);
-        if (stock < 0) {
+        this._Stock(mt, 1);
+
+/*        if (stock < 0) {
             this.#actif.St = 0;
-        }
+        }*/
         this._Fournisseur(vd._achtr, mt, 1);
 
-        const stockVd = vd._Stock(mt * (1 - txPrf), -1);
-        if (stockVd < 0) {
+        vd._Stock(mt * (1 - txPrf), -1);
+
+/*        if (stockVd < 0) {
             vd.#actif.St = 0;
-        }
+        }*/
         vd._Client(this._achtr, mt, 1);
 
 
@@ -200,8 +204,8 @@ class Entreprise {
         this._Salaire(mt, -1);
 
         vd._Tresorerie(mt, 1);
-        const stock = vd._Stock(mt * (1 - txPrf), -1);
-        if (stock < 0) {
+        vd._Stock(mt * (1 - txPrf), -1);
+        if (vd.getStocks < 0) {
             vd.#actif.St = 0;
         }
 
@@ -212,7 +216,7 @@ class Entreprise {
         this._Immobilisation(mt, 1);
         this._Fournisseur(vd._achtr, mt, 1);
 
-        const stock = vd._Stock(mt * (1 - txPrf), -1);
+        vd._Stock(mt * (1 - txPrf), -1);
         // if (stock<0){this.#actif.St=0;}
         vd._Client(this._achtr, mt, 1);
 
@@ -221,8 +225,8 @@ class Entreprise {
 
     Depreciation(vd, mt, txPrf = 0) {
         this._Immobilisation(mt, -1);
-        const stock = this._Stock(mt, 1);
-        if (stock < 0) {
+        this._Stock(mt, 1);
+        if (this.getStocks < 0) {
             this.#actif.St = 0;
         }
         this._majBilan(vd);
@@ -278,7 +282,7 @@ class Entreprise {
         this._majBilan(vd);
     }
 
-    FiReglement(vd, mt, txPrf = 0) {
+   /* FiReglement(vd, mt, txPrf = 0) {
         this._Kapital(mt, 1);
         this._Tresorerie(mt, 1);
         this._majBilan(vd);
@@ -286,6 +290,6 @@ class Entreprise {
 
     fiEscpti(vd, mt, txPrf = 0) {
         this._majBilan(vd);
-    }
+    }*/
 }
 export{Entreprise}
