@@ -1,7 +1,5 @@
 # drChristopheChabin.github.io
 
-[SITE](https://drchristophechabin.github.io/)
-
 Il s'agit d'une application qui rend compte de la liaison 
 entre la micro et la macroéconomie.
 Le framework tient compte des principales 
@@ -40,4 +38,3 @@ Certaines données sont enregistrées par défaut.
 + Le bouton RAZ efface toutes les données
 + Le bouton Pas à Pas execute les opérations les unes aprés les autres
   (il n'y à pas de retour arrière pour l'instant)
-

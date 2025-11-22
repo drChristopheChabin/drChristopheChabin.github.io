@@ -17,10 +17,10 @@ class Model {
         this._operation = new Operation()
         this._agentsList = this._operation.getAgents
         this._staticList = new ComptaNat();
-        /*this._operation.InitialiseAgent()
-        console.log(this._operation.getOperation)
-        console.log(this._agentsList)
-        console.log(this._operation.find('E1'))*/
+        //this._operation.InitialiseAgent()
+        //console.log(this._operation.getOperation)
+        //console.log(this._agentsList)
+        //console.log(this._operation.find('M'))
 
     }
 

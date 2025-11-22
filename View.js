@@ -377,8 +377,8 @@ class View {
 
         this.input1 = this.createElement('input', 'form-control')
         this.input1.type = 'text'
-        this.input1.placeholder = '60'
-        this.input1.defaultValue = 60
+        this.input1.placeholder = '90'
+        this.input1.defaultValue = 90
         this.input1.name = 'mtE1'
         this.input1.id = 'mtE1'
 
@@ -421,8 +421,8 @@ class View {
 
         this.input5 = this.createElement('input', 'form-control')
         this.input5.type = 'text'
-        this.input5.placeholder = '6'
-        this.input5.defaultValue = 6
+        this.input5.placeholder = '0'
+        this.input5.defaultValue = 0
         this.input5.name = 'xport'
         this.input5.id = 'xport'
 
@@ -432,8 +432,8 @@ class View {
 
         this.input6 = this.createElement('input', 'form-control')
         this.input6.type = 'text'
-        this.input6.placeholder = '7'
-        this.input6.defaultValue = 7
+        this.input6.placeholder = '0'
+        this.input6.defaultValue = 0
         this.input6.name = 'mport'
         this.input6.id = 'mport'
 
