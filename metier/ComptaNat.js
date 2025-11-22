@@ -129,7 +129,7 @@ class ComptaNat {
         }
         i = 0
         for (let agregat in this.#actif_TEE) {
-            // console.log("agregat"+agregat)
+             //console.log("agregat"+agregat)
             if (agregat === 'E') {
                 agregatT[i] = Object.entries(this.#actif_TEE[agregat]).map(entry => [entry[0], entry[1]])
                 // console.log(agregatT[i])
@@ -138,7 +138,7 @@ class ComptaNat {
                 // objCopy = Object.assign({}, this.#actif_TEE.E)
             } else {
                 agregatT[i] = Object.entries(this.#actif_TEE[agregat]).map(entry => [entry[0] + agregat, entry[1]])
-                // console.log(agregatT[i] )
+                 console.log(agregatT[i] )
                 i++
                 /*
                     modifActifExt = Object.fromEntries(
@@ -238,6 +238,7 @@ class ComptaNat {
 
     TeeRsal(mt) {
         this.#actif_TEE.E.sal += mt;
+        this.#actif_TEE.M.solde +=mt;
         this.getBilanTEE();
     }
 
@@ -274,6 +275,7 @@ class ComptaNat {
 
     TeeCfinale(mt) {
         this.#actif_TEE.M.c += mt;
+        this.#actif_TEE.M.solde -=mt;
         this.getBilanTEE();
     }
 

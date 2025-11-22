@@ -250,10 +250,10 @@ class Operation {
         if (ach.getColonneTOF === 'E' && ach.getNom === vdr.getNom) {
             ach.Depreciation(vdr, mt);
 
-            this.getCN;
-            this._CN.TeeProduction(mt);
-            this._CN.TeeStock(mt);
-            this._CN.getBilanTEE();
+           // this.getCN;
+            //this._CN.TeeProduction(mt);
+            //this._CN.TeeStock(mt);
+            //this._CN.getBilanTEE();
             // this.Session.setAttribut('cn', this._CN);
             validation = true;
         }
