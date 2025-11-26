@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <title>Documentation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        #content {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div id="content">Chargement...</div>
+</div>
+
+<script>
+    fetch('README.md')
+        .then(response => response.text())
+        .then(text => {
+            document.getElementById('content').innerHTML = marked.parse(text);
+        })
+        .catch(error => {
+            document.getElementById('content').innerHTML = '<p class="text-danger">Erreur de chargement du README</p>';
+            console.error('Erreur:', error);
+        });
+</script>
+</body>
+</html>

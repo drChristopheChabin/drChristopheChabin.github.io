@@ -58,7 +58,7 @@ Pour une production saisie de 90 dont 25 de biens d'investissement, il faut une 
 réelle de 25, ici l'épargne disponible est de 65 (90 - 25). En retirant les 25 pour la production de biens d'investissement
 il nous reste 40.
 
-Pour créer cette épargne réelle il faut faire un profit de 25. La production initiale passe à 15.
+Pour créer cette épargne réelle, il faut faire un profit de 25. La production initiale passe à 15.
 
 Sur ces 15, il faut 5 de biens d'amortissement soit une épargne réelle de 10.
 
