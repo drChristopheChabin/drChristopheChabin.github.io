@@ -138,7 +138,7 @@ class ComptaNat {
                 // objCopy = Object.assign({}, this.#actif_TEE.E)
             } else {
                 agregatT[i] = Object.entries(this.#actif_TEE[agregat]).map(entry => [entry[0] + agregat, entry[1]])
-                 console.log(agregatT[i] )
+                // console.log(agregatT[i] )
                 i++
                 /*
                     modifActifExt = Object.fromEntries(

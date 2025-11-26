@@ -69,7 +69,7 @@ class Model {
     }
 
     _loadFramework() {
-        let choix = 'getListProfit'
+        let choix = 'getListComplete'
         this.model = new Framework(this._mtE1, this._mtE2, this._txProfit, this._mtAmortit, this._xport, this._mport);
         // console.log(eval(`this.model.${choix}()`))
         return this._lesOperations = eval(`this.model.${choix}()`);
