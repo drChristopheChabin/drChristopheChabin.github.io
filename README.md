@@ -87,5 +87,31 @@ d'investissement supplémentaire, dans ces conditions, la consommation nette pas
 
 ## Processus
 ### 1 - Création du profit
+- E1 produit des biens d'investissement et E2 des biens de consommation, les deux pour le même montant.
+- Toute la production est achetée par E1 et E2 vend des titres aux ménages pour la moitié du revenu tandis que le 
+reste est acheté sous forme de bien de consommation.
+- Le profit monétaire (positif) correspond à la créance de E2 sur E1
+- Le profit réel (négatif) correspond au stock de biens detenu par E2
+- Les ménages disposent de titres sur E2
 ### 2 - Création de l'investissement
+- E2 finance une nouvelle production de biens de consommation.
+- E2 paie des salaires à partir de sa tresorerie
+- E2 achète des biens d'investissement à E1 et s'endette.
+- M achète la production de E2
+- E2 rembourse son endettement
+- M n'a pas soldé son passif, il y a déficit de l'écoulement
+- M sollicite un prêt excédentaire 
+- M le depense sous forme de titres ver E1
+- La dette de M est couverte par la créance de E1 (l'équilibre comptable est un déséquilibre économique)
 ### 3 - Création de l'amortissement
+- E1 produit des biens d'investissement qu'il finance avec sa tresorerie
+- E2 produit des biens de consommation et subi une depréciation de son capital physique
+- E2 achète les biens d'investissement à E1, c'est de l'amortissement.
+- M rembourse sa dette à la banque, ce qui crée un déficit de l'écoulement
+- M consomme le reste ver E2
+- A ce niveau un profit se forme entre E1 (+) et E2 (-)
+- M sollicite un prêt excédentaire
+- M le depense sous forme de titres ver E1
+- E1 achète les biens à E2 qui deviennent des biens d'investissement
+- E2 rembourse sa dette
+- la dette de M se reproduit, elle est couverte par la créance de E1 (l'équilibre comptable est un déséquilibre économique)
