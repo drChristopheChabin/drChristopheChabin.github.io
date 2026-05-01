@@ -1,295 +1,235 @@
-// ECMAScript 2015 - Es6
-class Entreprise {
-//les opérations réelles d'une entreprise
-    _achtr;
-    #_bqLoc;//string Banque
-    #_colonneTof;
-    #bilan;
-    #actif = {'Immo': 0, 'St': 0, 'T': 0, 'Rdm': 0}
-    #passif = {'K': 0, 'B': 0, 'Sal': 0, 'rdm': 0}
+import { AGENTS, ACCOUNTS } from './Constants.js';
 
+/**
+ * Represents a business entity (Entreprise) in the economic model.
+ * Handles assets (actif) and liabilities (passif) and various economic operations.
+ */
+export class Entreprise {
+    #achtr;
+    #bqLoc;
+    #colonneTof;
+    #actif = {
+        [ACCOUNTS.IMMO]: 0,
+        [ACCOUNTS.STOCK]: 0,
+        [ACCOUNTS.TRESORERIE]: 0
+    };
+    #passif = {
+        [ACCOUNTS.CAPITAL]: 0,
+        [ACCOUNTS.BANQUE]: 0,
+        [ACCOUNTS.SALAIRE]: 0
+    };
+
+    /**
+     * @param {string} achtr Name of the agent
+     * @param {string} colonneTof Category for TOF (Tableau des Opérations Financières)
+     */
     constructor(achtr, colonneTof) {
-        this._achtr = achtr;
-        this.#_colonneTof = colonneTof;
-        //Bdm est l'établissement financier de Bqm
-        if (this._achtr === 'Rdm') {
-            this.#_bqLoc = 'Bdm';
-        } else {
-            this.#_bqLoc = 'B';
-        }
+        this.#achtr = achtr;
+        this.#colonneTof = colonneTof;
+        // Bdm is the financial institution for Bqm (Rdm)
+        this.#bqLoc = (this.#achtr === AGENTS.RDM) ? AGENTS.BDM : AGENTS.B;
     }
 
-    get getNom() {
-        return this._achtr;
-    }
+    // --- Getters ---
 
-    get getactif() {
-        return this.#actif;
-    }
+    get getNom() { return this.#achtr; }
+    get getactif() { return this.#actif; }
+    get getpassif() { return this.#passif; }
+    get getBanque() { return this.#bqLoc; }
+    get getColonneTOF() { return this.#colonneTof; }
+    get getStocks() { return this.#actif[ACCOUNTS.STOCK]; }
 
-    get getpassif() {
-        return this.#passif;
-    }
-
-    get getBanque() {
-        return this.#_bqLoc;
-    }
-
-    get getColonneTOF() {
-        return this.#_colonneTof;
-    }
-
+    /**
+     * Generates a structured view of the balance sheet.
+     * @returns {Array} A 2D array representing the balance sheet (Actif vs Passif)
+     */
     get getBilan() {
-        this.#bilan = [];
-        let i = 0
-        for(i=0; i<Object.keys(this.#actif).length;i++){
-            this.#bilan[i]=new Array(2)
+        const actifKeys = Object.keys(this.#actif);
+        const passifKeys = Object.keys(this.#passif);
+        const maxLength = Math.max(actifKeys.length, passifKeys.length);
+
+        const bilan = [];
+        for (let i = 0; i < maxLength; i++) {
+            const row = new Array(2);
+            if (i < actifKeys.length) {
+                const key = actifKeys[i];
+                row[0] = { [key]: this.#actif[key] };
+            }
+            if (i < passifKeys.length) {
+                const key = passifKeys[i];
+                row[1] = { [key]: this.#passif[key] };
+            }
+            bilan[i] = row;
         }
-
-        i=0
-        for (let unCpt in this.#actif) {
-            this.#bilan[i][0]={[unCpt]: this.#actif[unCpt]}
-            i++
-        }
-        i = 0
-        for (let unCpt in this.#passif) {
-            this.#bilan[i][1]={[unCpt]: this.#passif[unCpt]}
-            i++
-        }
-        //this.#bilan = Object.assign({}, this.#actif, this.#passif)
-        //console.log(this.#bilan)
-        return this.#bilan;
+        return bilan;
     }
 
-    /****************Fonction privée************/
-    _majBilan(v) {
-        this.getBilan;
-        v.getBilan;
+    // --- Private Update Methods ---
+
+    #majBilan(v) {
+        // Keeps empty if no side-effect logic is needed
     }
 
-    _Immobilisation(mont, sign) {
-        this.#actif.Immo += sign * mont;
+    #Immobilisation(mont, sign) {
+        this.#actif[ACCOUNTS.IMMO] += sign * mont;
     }
 
-    _Kapital(mont, sign) {
-        this.#passif.K += sign * mont;
+    #Kapital(mont, sign) {
+        this.#passif[ACCOUNTS.CAPITAL] += sign * mont;
     }
 
-    _Stock(mont, sign) {
-        this.#actif['St'] += sign * mont;
-       //
+    #Stock(mont, sign) {
+        const oldStock = this.#actif[ACCOUNTS.STOCK];
+        this.#actif[ACCOUNTS.STOCK] += sign * mont;
+        console.log(`Entreprise ${this.#achtr}: Stock ${oldStock} -> ${this.#actif[ACCOUNTS.STOCK]} (sign=${sign}, mont=${mont})`);
     }
 
     Banque(mont, sign) {
-        this.#passif.B += sign * mont;
+        this.#passif[ACCOUNTS.BANQUE] += sign * mont;
     }
 
-    _Client(vd, mont, sign) {
-        // console.log(vd)
-        if (!this.#actif.hasOwnProperty(vd)) {
-            Object.defineProperty(this.#actif, vd, {
-                value: 0,
-                writable: true,
-                enumerable: true,
-                configurable: true,
-            });
+    #ensureAccount(obj, account) {
+        if (!(account in obj)) {
+            obj[account] = 0;
         }
-        if (!this.#passif.hasOwnProperty(vd.toLowerCase())) {
-            Object.defineProperty(this.#passif, vd.toLowerCase(), {
-                value: 0,
-                writable: true,
-                enumerable: true,
-                configurable: true,
-            });
-        }
-        if (this.#actif.hasOwnProperty(vd)) {
-            this.#actif[vd] += sign * mont
-        }
-
     }
 
-    _Fournisseur(vd, mont, sign) {
-        if (!this.#actif.hasOwnProperty(vd)) {
-            Object.defineProperty(this.#actif, vd, {
-                value: 0,
-                writable: true,
-                enumerable: true,
-                configurable: true,
-            });
-        }
-        if (!this.#passif.hasOwnProperty(vd.toLowerCase())) {
-            Object.defineProperty(this.#passif, vd.toLowerCase(), {
-                value: 0,
-                writable: true,
-                enumerable: true,
-                configurable: true,
-            });
-        }
-        vd = vd.toLowerCase()
-
-        this.#passif[vd] += sign * mont;
+    #Client(vd, mont, sign) {
+        this.#ensureAccount(this.#actif, vd);
+        this.#ensureAccount(this.#passif, vd.toLowerCase());
+        this.#actif[vd] += sign * mont;
     }
 
-    _Tresorerie(mont, sign) {
-        this.#actif.T += sign * mont;
+    #Fournisseur(vd, mont, sign) {
+        const vdLower = vd.toLowerCase();
+        this.#ensureAccount(this.#actif, vd);
+        this.#ensureAccount(this.#passif, vdLower);
+        this.#passif[vdLower] += sign * mont;
     }
 
-    _Salaire(mont, sign) {
-        this.#passif.Sal += sign * mont;
-    }
-    get getStocks(){
-        return this.#actif.St;
+    #Tresorerie(mont, sign) {
+        this.#actif[ACCOUNTS.TRESORERIE] += sign * mont;
     }
 
-    /***************Fonctions public*****************************/
-    Production(vd, mt, txPrf = 0) {
+    #Salaire(mont, sign) {
+        this.#passif[ACCOUNTS.SALAIRE] += sign * mont;
+    }
 
-        if (this._achtr !== 'M') {
+    // --- Public Economic Operations ---
 
-            this._Stock(mt, 1);
-            if (this.getStocks < 0) {
-                this.#actif.St = 0;
+    Production(vd, mt) {
+        if (this.#achtr !== AGENTS.M) {
+            this.#Stock(mt, 1);
+            this.#Salaire(mt, 1);
+            if (vd instanceof Entreprise) {
+                vd.#Salaire(mt, 1);
+                vd.#Client(this.#achtr, mt, 1);
             }
-            this._Salaire(mt, 1);
-
-            vd._Salaire(mt, 1);
-            vd._Client(this._achtr, mt, 1);
-
-            this._majBilan(vd);
-            //var_dump(this);
+            this.#majBilan(vd);
         }
-
     }
 
     CI(vd, mt, txPrf = 0) {
-        //Il faut nécessairement (en raison de la prog) que les agents soient des entreprises
-        this._Stock(mt, 1);
-
-/*        if (stock < 0) {
-            this.#actif.St = 0;
-        }*/
-        this._Fournisseur(vd._achtr, mt, 1);
-
-        vd._Stock(mt * (1 - txPrf), -1);
-
-/*        if (stockVd < 0) {
-            vd.#actif.St = 0;
-        }*/
-        vd._Client(this._achtr, mt, 1);
-
-
-        this._majBilan(vd);
+        this.#Stock(mt, 1);
+        this.#Fournisseur(vd.getNom, mt, 1);
+        if (vd instanceof Entreprise) {
+            vd.#Stock(mt * (1 - txPrf), -1);
+            vd.#Client(this.#achtr, mt, 1);
+        }
+        this.#majBilan(vd);
     }
 
-    SalairesPayes(vd, mt, txPrf = 0) {
-        this._Tresorerie(mt, 1);
-        this._Client(vd._achtr, mt, -1);
-
-        vd._Tresorerie(mt, -1);
-        vd._Salaire(mt, -1);
-
-        this._majBilan(vd);
+    SalairesPayes(vd, mt) {
+        this.#Tresorerie(mt, 1);
+        this.#Client(vd.getNom, mt, -1);
+        vd.#Tresorerie(mt, -1);
+        if (vd instanceof Entreprise) {
+            vd.#Salaire(mt, -1);
+        }
+        this.#majBilan(vd);
     }
 
-    RevenusNonSal(vd, mt, txPrf = 0) {
-        //Le vendeur est le payeur
-        this._Tresorerie(mt, 1);
-        vd._Tresorerie(mt, -1);
-
-        this._majBilan(vd);
+    RevenusNonSal(vd, mt) {
+        this.#Tresorerie(mt, 1);
+        vd.#Tresorerie(mt, -1);
+        this.#majBilan(vd);
     }
 
     Consommation(vd, mt, txPrf = 0) {
-        this._Tresorerie(mt, -1);
-        this._Salaire(mt, -1);
-
-        vd._Tresorerie(mt, 1);
-        vd._Stock(mt * (1 - txPrf), -1);
-        if (vd.getStocks < 0) {
-            vd.#actif.St = 0;
-        }
-
-        this._majBilan(vd);
+        this.#Tresorerie(mt, -1);
+        this.#Salaire(mt, -1);
+        vd.#Tresorerie(mt, 1);
+        vd.#Stock(mt * (1 - txPrf), -1);
+        this.#majBilan(vd);
     }
 
     Capital(vd, mt, txPrf = 0) {
-        this._Immobilisation(mt, 1);
-        this._Fournisseur(vd._achtr, mt, 1);
-
-        vd._Stock(mt * (1 - txPrf), -1);
-        // if (stock<0){this.#actif.St=0;}
-        vd._Client(this._achtr, mt, 1);
-
-        this._majBilan(vd);
-    }
-
-    Depreciation(vd, mt, txPrf = 0) {
-        this._Immobilisation(mt, -1);
-        this._Stock(mt, 1);
-        if (this.getStocks < 0) {
-            this.#actif.St = 0;
+        this.#Immobilisation(mt, 1);
+        this.#Fournisseur(vd.getNom, mt, 1);
+        if (vd instanceof Entreprise) {
+            vd.#Stock(mt * (1 - txPrf), -1);
+            vd.#Client(this.#achtr, mt, 1);
         }
-        this._majBilan(vd);
+        this.#majBilan(vd);
     }
 
-    CIPaid(vd, mt, txPrf = 0) {
-        if (this._achtr !== vd.getNom) {
-            this._Client(vd.getNom, mt, -1);
-            this._Tresorerie(mt, 1);
-            vd._Fournisseur(this._achtr, mt, -1);
+    Depreciation(vd, mt) {
+        this.#Immobilisation(mt, -1);
+        this.#Stock(mt, 1);
+        this.#majBilan(vd);
+    }
+
+    CIPaid(vd, mt) {
+        if (this.#achtr !== vd.getNom) {
+            this.#Client(vd.getNom, mt, -1);
+            this.#Tresorerie(mt, 1);
+            if (vd instanceof Entreprise) {
+                vd.#Fournisseur(this.getNom, mt, -1);
+            }
             vd.Banque(mt, 1);
         } else {
-            this._Tresorerie(mt, 1);
+            this.#Tresorerie(mt, 1);
             this.Banque(mt, 1);
         }
-
-        this._majBilan(vd);
+        this.#majBilan(vd);
     }
 
-    Escompte(vd, mt, txPrf = 0) {
-        this._majBilan(vd);
+    Escompte(vd, mt) {
+        this.#majBilan(vd);
     }
 
-    TitresAchat(vd, mt, txPrf = 0) {
-        this._Immobilisation(mt, 1);
-        this._Tresorerie(mt, -1);
-
-        vd._Kapital(mt, 1);
-        vd._Tresorerie(mt, 1);
-
-        this._majBilan(vd);
+    TitresAchat(vd, mt) {
+        this.#Immobilisation(mt, 1);
+        this.#Tresorerie(mt, -1);
+        if (vd instanceof Entreprise) {
+            vd.#Kapital(mt, 1);
+            vd.#Tresorerie(mt, 1);
+        }
+        this.#majBilan(vd);
     }
 
-    TitresRemboursement(vd, mt, txPrf = 0) {
-
-        this._Tresorerie(mt, -1);
+    TitresRemboursement(vd, mt) {
+        this.#Tresorerie(mt, -1);
         if (vd.getNom !== this.getNom) {
-            this._Kapital(mt, -1);
-            vd._Immobilisation(mt, -1);
-            vd._Tresorerie(mt, 1);
+            if (vd instanceof Entreprise) {
+                this.#Kapital(mt, -1);
+                vd.#Immobilisation(mt, -1);
+                vd.#Tresorerie(mt, 1);
+            }
         } else {
             this.Banque(mt, -1);
         }
-
-
-        this._majBilan(vd);
+        this.#majBilan(vd);
     }
 
-    RemboursementBq(vd, mt, txPrf = 0) {
+    VendreTitres(mt) {
+        this.#Kapital(mt, 1);
+        this.#Tresorerie(mt, 1);
+    }
+
+    RemboursementBq(vd, mt) {
         this.Banque(mt, -1);
-        this._Tresorerie(mt, -1);
-
-        this._majBilan(vd);
+        this.#Tresorerie(mt, -1);
+        this.#majBilan(vd);
     }
-
-   /* FiReglement(vd, mt, txPrf = 0) {
-        this._Kapital(mt, 1);
-        this._Tresorerie(mt, 1);
-        this._majBilan(vd);
-    }
-
-    fiEscpti(vd, mt, txPrf = 0) {
-        this._majBilan(vd);
-    }*/
 }
-export{Entreprise}

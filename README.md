@@ -9,6 +9,7 @@
     - [1 - Création du profit](#1---création-du-profit)
     - [2 - Création de l'investissement](#2---création-de-linvestissement)
     - [3 - Création de l'amortissement](#3---création-de-lamortissement)
+- [Monnaie internationale](#Monnaie-internationale)
 
 ## Objectif
 Il s'agit d'une application qui rend compte de la liaison 
@@ -49,8 +50,11 @@ Les unités monétaires sont fictives, il suffit de les adapter à chaque pays.
 C'est un système à 2 entreprises où :
 - E1 produit des biens de consommation
 - E2 produit des biens d'investissement
-- Il n'existe qu'une seule banque
 - Les ménages sont une seule entité
+- Il n'existe qu'une seule banque secondaire
+- Il existe une banque centrale nationale
+- Il existe une banque centrale du reste du monde (Bdm)
+- Il existe une entreprise du reste du monde (Rdm)
 
 ## Mode d'emploi
 Le bouton "choisir un paramétrage" donne accès à un formulaire. 
@@ -115,3 +119,10 @@ reste est acheté sous forme de bien de consommation.
 - E1 achète les biens à E2 qui deviennent des biens d'investissement
 - E2 rembourse sa dette
 - la dette de M se reproduit, elle est couverte par la créance de E1 (l'équilibre comptable est un déséquilibre économique)
+
+## Monnaie internationale
+En l'absence de banque centrale internationale, les échanges se font entre pays.
+A ce stade, il faut distinguer 2 groupes de pays :
+- ceux dont la monnaie est internationale (principalement les États-Unis)
+- ceux qui se servent de la monnaie internationale pour leurs échanges
+

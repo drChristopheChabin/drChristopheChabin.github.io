@@ -1,418 +1,318 @@
-import {ComptaNat} from './ComptaNat.js'
-import {Entreprise} from './Entreprise.js'
-import {Banque} from './Banque.js'
+import { ComptaNat } from './ComptaNat.js';
+import { Entreprise } from './Entreprise.js';
+import { Banque } from './Banque.js';
+import { AGENTS, CATEGORIES, OperationType } from './Constants.js';
 
-class Operation {
-
-    _agentsList;
-    _operationList;
-    _CN;
-    lesAgents
+/**
+ * Main coordinator for economic operations between agents.
+ * Manages agents, operation types, and handles national accounting integration.
+ */
+export class Operation {
+    #agentsList;
+    #operationList;
+    #CN;
+    banque;
 
     constructor() {
-        this._agentsList = new Set();
-        this._InitialiseAgent();
-        this._operationList = new Set();
-        this._InitialiseOperation();
-        this._CN = new ComptaNat();
-        this.banque = new Banque();
-        this.getAgents;
+        this.#agentsList = new Map();
+        this.#InitialiseAgent();
+        this.#operationList = new Set(Object.values(OperationType));
+        this.#CN = new ComptaNat();
+        this.banque = new Banque(AGENTS.B);
     }
 
+    /**
+     * Finds an agent by name.
+     * @param {string} name 
+     * @returns {Object|undefined}
+     */
     find(name) {
-        let recherche
-
-        for (let unagent of this._agentsList) {
-            if (unagent.getNom === name) {
-                recherche = unagent
-            }
-        }
-        return recherche
+        return this.#agentsList.get(name);
     }
 
-    update(agent) {
-
+    #InitialiseAgent() {
+        const agents = [
+            new Entreprise(AGENTS.E1, CATEGORIES.ENREPRISE),
+            new Entreprise(AGENTS.E2, CATEGORIES.ENREPRISE),
+            new Entreprise(AGENTS.E3, CATEGORIES.ENREPRISE),
+            new Entreprise(AGENTS.M, CATEGORIES.MENAGE),
+            new Entreprise(AGENTS.RDM, CATEGORIES.EXTERIEUR),
+            new Banque(AGENTS.B),
+            new Banque(AGENTS.BDM),
+            new Banque(AGENTS.BC)
+        ];
+        agents.forEach(agent => this.#agentsList.set(agent.getNom, agent));
     }
 
-    _InitialiseAgent() {
-        this._agentsList.add(new Entreprise('E1', 'E'));
-        this._agentsList.add(new Entreprise('E2', 'E'));
-        this._agentsList.add(new Entreprise('E3', 'E')); // Stat
-        this._agentsList.add(new Entreprise('M', 'M'));
-        this._agentsList.add(new Entreprise('Rdm', 'Ext'));
-        this._agentsList.add(new Banque('B'));
-        this._agentsList.add(new Banque('Bdm'));
-    }
+    get getOperation() { return this.#operationList; }
+    get getAgents() { return new Set(this.#agentsList.values()); } // Maintain backward compatibility
+    get getCN() { return this.#CN; }
 
-    _InitialiseOperation() {
-        this._operationList.add('Production');
-        this._operationList.add('ConsommationIntermediaire');
-        this._operationList.add('FiCI');
-        this._operationList.add('RevenusSal');
-        this._operationList.add('Consommation');
-        this._operationList.add('AchatTitres');
-        this._operationList.add('RachatTitres');
-        this._operationList.add('AchatImmob');
-        this._operationList.add('Depreciation');
-        this._operationList.add('RevenusNonSal');
-        this._operationList.add('RemboursementBq');
-        this._operationList.add('Paiement');
-        this._operationList.add('Credit');
-        this._operationList.add('ReEscompte');
-    }
-
-    get getOperation() {
-        return this._operationList;
-    }
-
-    get getAgents() {
-        return this._agentsList;
-    }
-
-    get getCN() {
-        return this._CN;
-    }
-
-    get getInfos() {
-        for (let [key, value] of this._agentsList.entries()) console.log(value);
-
-    }
-
-    get getTest() {
-        let acheteur = ''
-        let vendeur = ''
-
-        acheteur = this.find('E1')
-
-        vendeur = this.find('M')
-
-        this.Production(acheteur, vendeur, 10)
-    }
+    // --- Economic Operations ---
 
     Production(ach, vdr, mt) {
-        let validation = "Le vendeur doit être M";
-        if (vdr.getNom === 'M') {
-            ach.Production(vdr, mt);
-            //console.log(ach.getBilan)
-            //console.log(vdr.getBilan)
-            //  CHARGEMENT DE LA SESSION
-            this.getCN;
-            this._CN.TeeProduction(mt);
-            this._CN.TeeStock(mt);
-            this._CN.getBilanTEE();
-            // SAUVEGARDE DE LA SESSION
-            //this.Session.setAttribut('cn', this._CN);
-            validation = true;
-        }
-        return validation;
+        if (vdr.getNom !== AGENTS.M) return "Le vendeur doit être M";
+
+        ach.Production(vdr, mt);
+        this.#CN.TeeProduction(mt);
+        this.#CN.TeeStock(mt);
+        return true;
     }
 
     ConsommationIntermediaire(ach, vdr, mt, txPrf = 0) {
-        let validation = "M ne peut pas figurer dans cette opération";
-        if (vdr.getNom !== 'M' && ach.getNom !== 'M') {
-            ach.CI(vdr, mt);
-            this.getCN;
-            if (ach.getNom === "Rdm") {
-                this.getCN;
-                this._CN.TeeExport(mt * (1 - txPrf));
-                this._CN.TeeStock(-1 * mt * (1 - txPrf));
-                this._CN.getBilanTEE();
-                //this.Session.setAttribut('cn', this._CN);
-                validation = true;
-            }
-            if (vdr.getNom === "Rdm") {
-                this._CN.TeeImport(mt * (1 - txPrf));
-                this._CN.TeeStock(mt * (1 - txPrf));
-                validation = true;
-            } else if (ach.getNom !== "Rdm") {
-                this._CN.TeeCInterm(mt);
-                this._CN.TeeProduction(mt);
-                validation = true;
-            }
+        console.log(`Operation: ConsommationIntermediaire(ach=${ach?.getNom}, vdr=${vdr?.getNom}, mt=${mt}, txPrf=${txPrf})`);
+        if (vdr.getNom === AGENTS.M || ach.getNom === AGENTS.M) return "M ne peut pas figurer dans cette opération";
 
-            this._CN.getBilanTEE();
-            // SAUVEGARDE DE LA SESSION
-            //this.Session.setAttribut('cn', this._CN);
+        ach.CI(vdr, mt, txPrf);
+
+        if (ach.getNom === AGENTS.RDM) {
+            this.#CN.TeeExport(mt * (1 - txPrf));
+            this.#CN.TeeStock(-1 * mt * (1 - txPrf));
+        } else if (vdr.getNom === AGENTS.RDM) {
+            this.#CN.TeeImport(mt * (1 - txPrf));
+            this.#CN.TeeStock(mt * (1 - txPrf));
+        } else {
+            this.#CN.TeeCInterm(mt);
+            this.#CN.TeeProduction(mt);
         }
-        return validation;
+        return true;
     }
 
     FiCI(ach, vdr, mt) {
-        let validation = "M ne peut pas figurer comme acheteur ou B ne peut pas figurer comme vendeur";
-        if (!(vdr.getNom !== 'M' ^ ach.getNom !== 'M') && vdr.getNom !== 'B' || vdr.getNom === 'M') {
-            ach.CIPaid(vdr, mt);
-            validation = true;
-        }
-        this.getCN;
-        this._CN.actif_TOF(ach.getColonneTOF, 0, -1);
-        this._CN.actif_TOF(vdr.getColonneTOF, 0, 1);
-        this._CN.getBilanTOF();
-        //this.Session.setAttribut('cn', this._CN);
-        return validation;
+        const cond = (!(vdr.getNom !== AGENTS.M ^ ach.getNom !== AGENTS.M) && vdr.getNom !== AGENTS.B || vdr.getNom === AGENTS.M);
+        if (!cond) return "M ne peut pas figurer comme acheteur ou B ne peut pas figurer comme vendeur";
+
+        ach.CIPaid(vdr, mt);
+        this.#CN.actif_TOF(ach.getColonneTOF, mt, -1);
+        this.#CN.actif_TOF(vdr.getColonneTOF, mt, 1);
+        return true;
     }
 
     FiCredit(ach, vdr, mt) {
-        //validation = "les acheteurs sont les vendeurs";
-        //if (vdr.getNom == ach.getNom) {
         ach.CIPaid(vdr, mt);
-        let validation = true;
-        //}
-        this.getCN;
-        this._CN.actif_TOF(ach.getColonneTOF, 0, 1);
-        this._CN.passif_TOF(vdr.getColonneTOF, 0, 1);
-        this._CN.getBilanTOF();
-        //this.Session.setAttribut('cn', this._CN);
-        return validation;
+        this.#CN.actif_TOF(ach.getColonneTOF, mt, 1);
+        this.#CN.passif_TOF(vdr.getColonneTOF, mt, 1);
+        return true;
     }
 
     RevenusSal(ach, vdr, mt) {
-        let validation = 'Le vendeur ne peut pas être M';
-        if (vdr.getNom !== 'M') {
-            ach.SalairesPayes(vdr, mt);
+        if (vdr.getNom === AGENTS.M) return 'Le vendeur ne peut pas être M';
 
-            this.getCN;
-            this._CN.TeeRsal(mt);
-            this._CN.TeeRsalEM(mt);
-            this._CN.getBilanTEE();
-            //this.Session.setAttribut('cn', this._CN);
-            validation = true;
-        }
-        return validation;
+        ach.SalairesPayes(vdr, mt);
+        this.#CN.TeeRsal(mt);
+        this.#CN.TeeRsalEM(mt);
+        return true;
     }
 
     Consommation(ach, vdr, mt, txPrf = 0) {
-        let validation = "L'acheteur doit être M";
-        if (ach.getNom === 'M') {
-            ach.Consommation(vdr, mt);
-            // var_dump(vdr);
+        if (ach.getNom !== AGENTS.M) return "L'acheteur doit être M";
 
-            this.getCN;
-            this._CN.TeeCfinale(mt);
-            this._CN.TeeStock(-1 * mt * (1 - txPrf));
-            this._CN.getBilanTEE();
-            //this.Session.setAttribut('cn', this._CN);
-            validation = true;
-        }
-        return validation;
+        ach.Consommation(vdr, mt, txPrf);
+        this.#CN.TeeCfinale(mt);
+        this.#CN.TeeStock(-1 * mt * (1 - txPrf));
+        return true;
     }
 
     AchatTitres(ach, vdr, mt) {
-        let validation = "Le vendeur ni l'acheteur ne peuvent être B";
-        if (vdr.getNom !== 'B' && ach.getNom !== 'B') {
-            ach.TitresAchat(vdr, mt);
-            validation = true;
+        if (vdr.getNom === AGENTS.B || ach.getNom === AGENTS.B) return "Le vendeur ni l'acheteur ne peuvent être B";
 
-            this.getCN;
-            this._CN.actif_TOF(ach.getColonneTOF, mt, 1);
-            this._CN.passif_TOF(vdr.getColonneTOF, mt, 1);
-            this._CN.getBilanTOF();
-            //this.Session.setAttribut('cn', this._CN);
-        }
-        return validation;
+        ach.TitresAchat(vdr, mt);
+        this.#CN.actif_TOF(ach.getColonneTOF, mt, 1);
+        this.#CN.passif_TOF(vdr.getColonneTOF, mt, 1);
+        return true;
     }
 
     RachatTitres(ach, vdr, mt) {
-        let validation = "B ne peut pas figurer comme acheteur ou vendeur";
-        if (vdr.getNom !== 'B') {
-            ach.TitresRemboursement(vdr, mt);
+        if (vdr.getNom === AGENTS.B) return "B ne peut pas figurer comme vendeur";
 
-            validation = true;
-
-            this.getCN;
-            this._CN.passif_TOF(ach.getColonneTOF, mt, -1);
-            this._CN.actif_TOF(vdr.getColonneTOF, mt, -1);
-            this._CN.getBilanTOF();
-            //this.Session.setAttribut('cn', this._CN);
-        }
-        return validation;
+        ach.TitresRemboursement(vdr, mt);
+        this.#CN.passif_TOF(ach.getColonneTOF, mt, -1);
+        this.#CN.actif_TOF(vdr.getColonneTOF, mt, -1);
+        return true;
     }
 
     AchatImmob(ach, vdr, mt, txPrf = 0) {
-        let validation = "C'est une opération inter entreprises";
-        if (!(vdr.getNom !== 'M' ^ ach.getNom !== 'M') && vdr.getNom !== 'B' || vdr.getNom === 'M') {
+        const cond = (!(vdr.getNom !== AGENTS.M ^ ach.getNom !== AGENTS.M) && vdr.getNom !== AGENTS.B || vdr.getNom === AGENTS.M);
+        if (!cond) return "C'est une opération inter entreprises";
 
-
-            ach.Capital(vdr, mt);
-
-            this.getCN;
-            this._CN.TeeFbcf(mt);
-            this._CN.TeeStock(-1 * mt * (1 - txPrf));
-            this._CN.getBilanTEE();
-            //this.Session.setAttribut('cn', this._CN);
-
-            validation = true;
-        }
-        return validation;
+        ach.Capital(vdr, mt, txPrf);
+        this.#CN.TeeFbcf(mt);
+        this.#CN.TeeStock(-1 * mt * (1 - txPrf));
+        return true;
     }
 
     Depreciation(ach, vdr, mt) {
-        let validation = "C'et une opération sur une seule entreprise";
-        if (ach.getColonneTOF === 'E' && ach.getNom === vdr.getNom) {
-            ach.Depreciation(vdr, mt);
+        if (ach.getColonneTOF !== CATEGORIES.ENREPRISE || ach.getNom !== vdr.getNom) return "C'est une opération sur une seule entreprise";
 
-           // this.getCN;
-            //this._CN.TeeProduction(mt);
-            //this._CN.TeeStock(mt);
-            //this._CN.getBilanTEE();
-            // this.Session.setAttribut('cn', this._CN);
-            validation = true;
-        }
-        return validation;
+        ach.Depreciation(vdr, mt);
+        this.#CN.TeeFbcf(mt * -1);
+        this.#CN.TeeStock(mt);
+        return true;
     }
 
     RevenusNonSal(ach, vdr, mt) {
-        let validation;
         ach.RevenusNonSal(vdr, mt);
-        this.getCN;
-        if (vdr.getNom !== 'M') {
-            this._CN.TeeRnsalEE(mt);
-            if (ach.getNom !== 'M') {
-                this._CN.TeeRnsalER(mt);
-            } else {
-                this._CN.TeeRnsalME(mt);
-            }
+        if (vdr.getNom !== AGENTS.M) {
+            this.#CN.TeeRnsalEE(mt);
+            if (ach.getNom !== AGENTS.M) this.#CN.TeeRnsalER(mt);
+            else this.#CN.TeeRnsalMR(mt);
         } else {
-            this._CN.TeeRnsalME(mt);
-            if (ach.getNom !== 'M') {
-                this._CN.TeeRnsalER(mt);
-            } else {
-                this._CN.TeeRnsalMR(mt);
-            }
+            this.#CN.TeeRnsalME(mt);
+            if (ach.getNom !== AGENTS.M) this.#CN.TeeRnsalER(mt);
+            else this.#CN.TeeRnsalMR(mt);
         }
-        this._CN.getBilanTEE();
-        //this.Session.setAttribut('cn', this._CN);
-        validation = true;
-
-        return validation;
+        return true;
     }
 
     RemboursementBq(ach, vdr, mt) {
-        let validation;
         ach.RemboursementBq(vdr, mt);
-        validation = true;
-
-        this.getCN;
-        this._CN.actif_TOF(ach.getColonneTOF, 0, -1);
-        this._CN.actif_TOF(vdr.getColonneTOF, 0, 1);
-        this._CN.getBilanTOF();
-        //this.Session.setAttribut('cn', this._CN);
-
-        return validation;
-
-
+        this.#CN.actif_TOF(ach.getColonneTOF, 0, -1);
+        this.#CN.actif_TOF(vdr.getColonneTOF, 0, 1);
+        return true;
     }
 
     Paiement(ach, vdr, mt) {
-        let validation, bqv, bqa;
-        bqv = this.find(vdr.getBanque);
-        bqa = this.find(ach.getBanque);
+        let bqv = this.find(vdr.getBanque);
+        let bqa = this.find(ach.getBanque);
+
         if (ach.getBanque === vdr.getBanque) {
-            // console.log(ach.getBanque)
-            bqa = this.find(ach.getBanque)
             bqv.BanqueFinPassif(vdr.getNom, mt);
             bqa.BanqueFinPassif(ach.getNom, -1 * mt);
-        } else if (vdr.getNom === 'Rdm' || ach.getNom === 'Rdm') {
-            bqa.BanqueFinPassif('BC', mt);
+        } else if (vdr.getNom === AGENTS.RDM || ach.getNom === AGENTS.RDM) {
+            bqa.BanqueFinPassif(AGENTS.BC, mt);
             bqa.BanqueFinPassif(ach.getNom, -1 * mt);
             bqv.BanqueFinPassif(vdr.getNom, mt);
-            bqv.BanqueFinActif('BC', mt);
+            bqv.BanqueFinActif(AGENTS.BC, mt);
         }
 
-        this.getCN;
-        this._CN.actif_TOF(ach.getColonneTOF, mt, -1);
-        this._CN.actif_TOF(vdr.getColonneTOF, mt, 1);
-        this._CN.getBilanTOF();
-
-
-        validation = true;
-
-        return validation;
+        this.#CN.actif_TOF(ach.getColonneTOF, mt, -1);
+        this.#CN.actif_TOF(vdr.getColonneTOF, mt, 1);
+        return true;
     }
 
     Credit(ach, vdr, mt) {
-        let validation, bqv, bqa, ptof, atof;
-        bqv = this.find(vdr.getBanque);
-        bqa = this.find(ach.getBanque);
+        let bqv = this.find(vdr.getBanque);
+        let bqa = this.find(ach.getBanque);
+        let ptof, atof;
+
         if (ach.getBanque === vdr.getBanque) {
             bqa.BanqueFinActif(ach.getNom, mt);
             bqa.BanqueFinPassif(vdr.getNom, mt);
-
-            ptof = ach.getColonneTOF
-            atof = vdr.getColonneTOF
-        } else if (vdr.getNom === 'Rdm') {
-
-            bqa.BanqueFinPassif('BC', mt);
+            ptof = ach.getColonneTOF;
+            atof = vdr.getColonneTOF;
+        } else if (vdr.getNom === AGENTS.RDM) {
+            bqa.BanqueFinPassif(AGENTS.BC, mt);
             bqa.BanqueFinActif(ach.getNom, mt);
-
-            bqv.BanqueFinPassif('Rdm', mt);
-            bqv.BanqueFinActif('BC', mt);
-
-            ptof = ach.getColonneTOF
-            atof = 'BC'
+            bqv.BanqueFinPassif(AGENTS.RDM, mt);
+            bqv.BanqueFinActif(AGENTS.BC, mt);
+            ptof = ach.getColonneTOF;
+            atof = AGENTS.BC;
         } else {
-
             bqv.BanqueFinPassif(vdr.getNom, mt);
-            bqv.BanqueFinActif('BC', mt);
-
-            bqa.BanqueFinPassif('BC', mt);
-            bqa.BanqueFinActif('Rdm', mt);
-
-            ptof = 'BC'
-            atof = vdr.getColonneTOF
+            bqv.BanqueFinActif(AGENTS.BC, mt);
+            bqa.BanqueFinPassif(AGENTS.BC, mt);
+            bqa.BanqueFinActif(AGENTS.RDM, mt);
+            ptof = AGENTS.BC;
+            atof = vdr.getColonneTOF;
         }
 
-        this.getCN;
-        this._CN.passif_TOF(ptof, mt, 1);
-        this._CN.actif_TOF(atof, mt, 1);
-        this._CN.getBilanTOF();
-        validation = true;
-
-        return validation;
+        this.#CN.passif_TOF(ptof, mt, 1);
+        this.#CN.actif_TOF(atof, mt, 1);
+        return true;
     }
 
-    ReEscompte(ach, vdr = 'BC', mt) {
-        let validation, bqa;
-        validation = "Acht = BC";
-        bqa = this.find(ach.getBanque);
-        if (ach.getColonneTOF === 'E') {
-            bqa.BanqueFinActif(ach.getNom, -mt);
-            bqa.BanqueFinActif('BC', mt);
+    ReEscompte(ach, vdr = AGENTS.BC, mt) {
+        if (ach.getColonneTOF !== CATEGORIES.ENREPRISE) return "Acht = BC";
 
-            this.getCN;
-            this._CN.passif_TOF('BC', mt, 1);
-            this._CN.passif_TOF(ach.getColonneTOF, mt, -1);
-            this._CN.getBilanTOF();
+        let bqa = this.find(ach.getBanque);
+        bqa.BanqueFinActif(ach.getNom, -mt);
+        bqa.BanqueFinActif(AGENTS.BC, mt);
 
-            validation = true;
-        }
-        return validation;
+        this.#CN.passif_TOF(AGENTS.BC, mt, 1);
+        this.#CN.passif_TOF(ach.getColonneTOF, mt, -1);
+        return true;
+    }
+    /*
+    *Echange inter bancaire entre BC et une autre banque Bq ou Bqm
+    *Si BC est débiteur envers Bqm, il est acheteur de titres de Bqm
+    *BC vend des titres à Bqm
+
+    *Si BC est créditeur net, il affecte cette monnaie aux réserves
+     */
+    // FiReglementInt(ach=AGENTS.BDM, vdr, mt, txPrf)
+    FiReglementInternational(ach, vdr, mt, txPrf = 0) {
+        // vdr est E3, ach est Bdm (agent)
+        // E3 : Actif T 100, Passif K 100
+        vdr.VendreTitres(mt);
+
+        // Mouvements bancaires corrigés
+        const bqv = this.find(vdr.getBanque); // Banque du vendeur (B)
+        const bqa = this.find(AGENTS.BDM);    // Banque de l'acheteur (Bdm)
+        const bc = this.find(AGENTS.BC);      // Banque Centrale (BC)
+
+        // B : Actif BC 100, Passif E3 100
+        bqv.BanqueFinActif(AGENTS.BC, mt);
+        bqv.BanqueFinPassif(vdr.getNom, mt);
+
+        // Bdm : Actif Bfi 100, Passif BC 100
+        bqa.BanqueFinActif('Bfi', mt);
+        bqa.BanqueFinPassif(AGENTS.BC, mt);
+
+        // BC : Actif Bdm 100, Passif B 100
+        bc.BanqueFinActif(bqa.getNom, mt);
+        bc.BanqueFinPassif(bqv.getNom, mt);
+
+        // TOF (Strictly as requested)
+        this.#CN.actif_TOF(AGENTS.BC, mt, 1);              // BC debiteur
+        this.#CN.passif_TOF(AGENTS.BC, mt, 1);             // BC crediteur
+        this.#CN.passif_TOF(CATEGORIES.EXTERIEUR, mt, 1);  // EXT crediteur
+        this.#CN.actif_TOF(CATEGORIES.ENREPRISE, mt, 1);   // E debiteur
+
+        return true;
+    }
+    /*
+    *Situation de monnaie internationale
+    *le rdm vends des titres et paie l'interbancaire pour le reglement
+     */
+    FIEscompteInternational(ach, vdr, mt, txPrf = 0) {
+        const mtEscompte = mt * 0.1; // 100 -> 10 as per user example
+
+        const bqv = this.find(vdr.getBanque); // Banque B
+        const bqa = this.find(AGENTS.BDM);    // Banque Bdm
+        const bc = this.find(AGENTS.BC);      // Banque Centrale
+
+        // B : Actif E3 -100, Actif BC 100
+        bqv.BanqueFinActif(vdr.getNom, -mt);
+        bqv.BanqueFinActif(AGENTS.BC, mt);
+
+        // Bdm : Actif bfi 10, Passif BC 10
+        bqa.BanqueFinActif('Bfi', mtEscompte);
+        bqa.BanqueFinPassif(AGENTS.BC, mtEscompte);
+
+        // BC : Passif B 100, Actif Bdm 10
+        bc.BanqueFinPassif(bqv.getNom, mt);
+        bc.BanqueFinActif(bqa.getNom, mtEscompte);
+
+        // TOF : Actif BC 10, Passif E 10
+        this.#CN.actif_TOF(AGENTS.BC, mtEscompte, 1);
+        this.#CN.passif_TOF(CATEGORIES.ENREPRISE, mtEscompte, 1);
+
+        return true;
     }
 
-    /* EscompteInternational(ach, vdr, mt) {
-         let validation, bqv, bqi;
-         validation = "Acht = B";
-         if (ach.getNom === 'B') {
-             bqv = this.find(vdr.getBanque);
-             bqi = this.find('Brm');
-             bqv.BanqueFinActif(vdr.getNom, -1 * mt);
-             bqv.BanqueFinActif('BC', mt);
+    Exportation(ach, vdr, mt, txPrf = 0) {
+        return this.ConsommationIntermediaire(ach, vdr, mt, txPrf);
+    }
+    Importation(ach, vdr, mt, txPrf = 0) {
+        return this.ConsommationIntermediaire(ach, vdr, mt, txPrf);
+    }
+    FiX(ach, vdr, mt, txPrf = 0) {
+        this.FiCI(vdr, ach, mt, txPrf)
+        return this.Credit(ach, vdr, mt, txPrf);
+    }
 
-             bqi.BanqueFinActif(ach.getNom, mt);
-             bqi.BanqueFinPassif('BC', mt);
-
-             this.getCN;
-             this._CN.actif_TOF('BC', mt, 1);
-             this._CN.passif_TOF(vdr.getColonneTOF, mt, 1);
-             this._CN.getBilanTOF();
-             //this.Session.setAttribut('cn', this._CN);
-
-             validation = true;
-         }
-
-         return validation;
-     }*/
-
-
+    FiM(ach, vdr, mt, txPrf = 0) {
+        this.FiCI(vdr, ach, mt, txPrf)
+        return this.Credit(ach, vdr, mt, txPrf);
+    }
 }
-
-export {Operation}

@@ -1,124 +1,83 @@
-class Banque {
-    _achtr;
-    #_colonneT = 'B';
-    #actif = {
-        'BC': 0,
-        'M': 0,
-        'Bfi': 0,
-        'Rdm': 0
-    };
-    #passif = {
-        'BC': 0,
-        'M': 0,
-        'Bfi': 0,
-        'Rdm': 0
-    };
-    #bilan;
+import { AGENTS, CATEGORIES } from './Constants.js';
 
+/**
+ * Represents a logical Bank (Banque) in the economic model.
+ * Manages accounts (actif/passif) for different agents.
+ */
+export class Banque {
+    #achtr;
+    #colonneT = CATEGORIES.BANQUE;
+    #actif = {};
+    #passif = {};
+
+    /**
+     * @param {string} achtr Name of the agent
+     */
     constructor(achtr) {
-        this._achtr = achtr;
-
+        this.#achtr = achtr;
     }
 
-    get getNom() {
-        return this._achtr;
+    // --- Getters ---
+
+    get getNom() { return this.#achtr; }
+    get getColonneT() { return this.#colonneT; }
+    get getactif() { return this.#actif; }
+    get getpassif() { return this.#passif; }
+    get getBCactif() { return this.#actif[AGENTS.BC] || 0; }
+    get getBCpassif() { return this.#passif[AGENTS.BC] || 0; }
+
+    /**
+     * Generates a structured view of the bank's balance sheet.
+     * @returns {Array} A 2D array where each element is [ {ActifAccount: Value}, {PassifAccount: Value} ]
+     */
+    get getBilan() {
+        const actifKeys = Object.keys(this.#actif);
+        const passifKeys = Object.keys(this.#passif);
+        const maxLength = Math.max(actifKeys.length, passifKeys.length);
+
+        const bilan = [];
+        for (let i = 0; i < maxLength; i++) {
+            const entry = [];
+            if (i < actifKeys.length) {
+                const key = actifKeys[i];
+                entry.push({ [key]: this.#actif[key] });
+            }
+            if (i < passifKeys.length) {
+                const key = passifKeys[i];
+                entry.push({ [key]: this.#passif[key] });
+            }
+            bilan[i] = entry;
+        }
+        return bilan;
+    }
+
+    // --- Account Management ---
+
+    #ensureAccount(obj, ent) {
+        if (!(ent in obj)) {
+            obj[ent] = 0;
+        }
     }
 
     /**
-     * @return string
+     * Updates an asset account.
+     * @param {string} ent Agent name
+     * @param {number} montant Amount to add
      */
-    get getColonneT() {
-        return this.#_colonneT;
-    }
-    get getactif() {
-        return this.#actif;
-    }
-
-    get getpassif() {
-        return this.#passif;
-    }
-
-   /* get getBilan() {
-        let obj1
-        let modifActif
-        obj1 = Object.assign({}, this.#actif)
-
-        modifActif = Object.fromEntries(
-            Object.entries(this.#passif).map(entry => [entry[0].toLowerCase(), entry[1]])
-        )
-
-        this.#bilan = Object.assign({}, obj1, modifActif)
-        //console.log(this.#bilan)
-        return this.#bilan;
-    }*/
-    get getBCactif(){
-        return this.#actif.BC
-    }
-    get getBCpassif(){
-        return this.#passif.BC
-    }
-    get getBilan() {
-        this.#bilan = [];
-        let i = 0
-        for (let unCpt in this.#actif) {
-            this.#bilan[i] = [{[unCpt]: this.#actif[unCpt]}]
-            i++
-        }
-        i = 0
-        for (let unCpt in this.#passif) {
-            this.#bilan[i].push({[unCpt]: this.#passif[unCpt]})
-            i++
-        }
-        //this.#bilan = Object.assign({}, this.#actif, this.#passif)
-        //console.log(this.#bilan)
-        return this.#bilan;
-    }
-
     BanqueFinActif(ent, montant) {
-        if (!this.#actif.hasOwnProperty(ent)) {
-            Object.defineProperty(this.#actif, ent, {
-                value: 0,
-                writable: true,
-                enumerable: true,
-                configurable: true,
-            });
-        }
-        if (!this.#passif.hasOwnProperty(ent)) {
-            Object.defineProperty(this.#passif, ent, {
-                value: 0,
-                writable: true,
-                enumerable: true,
-                configurable: true,
-            });
-        }
-
+        this.#ensureAccount(this.#actif, ent);
+        this.#ensureAccount(this.#passif, ent);
         this.#actif[ent] += montant;
-        this.getBilan;
     }
 
-    BanqueFinPassif(ent,montant){
-        if (!this.#passif.hasOwnProperty(ent)) {
-            Object.defineProperty(this.#passif, ent, {
-                value: 0,
-                writable: true,
-                enumerable: true,
-                configurable: true,
-            });
-        }
-        if (!this.#actif.hasOwnProperty(ent)) {
-            Object.defineProperty(this.#actif, ent, {
-                value: 0,
-                writable: true,
-                enumerable: true,
-                configurable: true,
-            });
-        }
-
+    /**
+     * Updates a liability account.
+     * @param {string} ent Agent name
+     * @param {number} montant Amount to add
+     */
+    BanqueFinPassif(ent, montant) {
+        this.#ensureAccount(this.#passif, ent);
+        this.#ensureAccount(this.#actif, ent);
         this.#passif[ent] += montant;
-        this.getBilan;
-
     }
-
-
 }
-export {Banque}

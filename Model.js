@@ -1,195 +1,279 @@
-import {Operation} from './metier/Operation.js'
-import {ComptaNat} from './metier/ComptaNat.js'
-import {Framework} from './metier/Framework.js'
-/**
- *
- * @property {Object} _operation
- * @property {Object} _staticList
- * @property {Object} _agentsList
- * @property {Object} model
- * @property {Object} _lesOperations
- */
+import { Operation } from './metier/Operation.js';
+import { ComptaNat } from './metier/ComptaNat.js';
+import { CnFramework } from './metier/CnFramework.js';
+import { SandBoxFramework } from './metier/SandBoxFramework.js';
+import { EventHandler } from './controllers/EventHandler.js';
 
-class Model {
+/**
+ * @property {Object} #operation
+ * @property {Object} #staticList
+ * @property {Object} #agentsList
+ * @property {Object} model
+ * @property {Object} #lesOperations
+ */
+export class Model {
+    #operation;
+    #agentsList;
+    #staticList;
+    #lesOperations;
+    #params;
+    #onFormValidate;
 
     constructor() {
+        this.#operation = new Operation();
+        this.#agentsList = this.#operation.getAgents;
+        this.#staticList = new ComptaNat();
+        this.#lesOperations = [];
+        this.model = null;
+        this.eventHandler = new EventHandler();
 
-        this._operation = new Operation()
-        this._agentsList = this._operation.getAgents
-        this._staticList = new ComptaNat();
-        //this._operation.InitialiseAgent()
-        //console.log(this._operation.getOperation)
-        //console.log(this._agentsList)
-        //console.log(this._operation.find('M'))
-
+        // Paramètres par défaut
+        this.#params = {
+            mtE1: 0,
+            mtE2: 0,
+            txProfit: 0,
+            mtAmortit: 0,
+            xport: 0,
+            mport: 0,
+            mInter: false,
+            mode: 'modelcn'
+        };
+        // Callbacks
+        this.#onFormValidate = null;
     }
 
+    /**
+     * Réinitialise l'état du modèle
+     */
+    reset() {
+        this.#operation = new Operation();
+        this.#agentsList = this.#operation.getAgents;
+        this.#staticList = new ComptaNat();
+        this.#lesOperations = [];
+        const currentMode = this.#params.mode;
+        this.#params = {
+            mtE1: 0,
+            mtE2: 0,
+            txProfit: 0,
+            mtAmortit: 0,
+            xport: 0,
+            mport: 0,
+            mInter: false,
+            mode: currentMode
+        };
+        this.eventHandler.iteration = -1;
+    }
+
+    /**
+     * Lie le callback de validation du formulaire
+     * @param {Function} callback - Fonction à appeler après validation
+     */
     bindFormValidate(callback) {
-        this._onFormValidate = callback;
+        this.#onFormValidate = callback;
     }
 
-    loadParam(param, iteration) {
-        this._iteration = iteration
+    /**
+     * Charge les paramètres depuis le formulaire
+     * @param {NodeList} param - Liste des inputs du formulaire
+     * @param {number} iteration - Numéro d'itération
+     * @param {string} mode - Mode de fonctionnement ('modelcn' ou 'sandbox')
+     */
+    loadParam(param, iteration, mode = 'modelcn') {
+        console.log(`Model: loadParam (itération=${iteration}, mode=${mode})`, param);
 
-        for (let i = 0; i < param.length; i++) {
-          //  console.log(`${param[i].name}:${param[i].value}`)
+        this.eventHandler.iteration = iteration;
+        this.#params.mode = mode;
 
-            switch (param[i].name) {
-                case 'mtE1':
-                    this._mtE1 = param[i].value | 0;
-                    break;
-                case 'mtE2':
-                    this._mtE2 = param[i].value | 0;
-                    break;
-                case 'txProfit':
-                    this._txProfit = param[i].value | 0;
-                    break
-                case 'mtAmortit':
-                    this._mtAmortit = param[i].value | 0;
-                    break;
-                case'xport':
-                    this._xport = param[i].value | 0;
-                    break;
-                case'mport':
-                    this._mport = param[i].value | 0;
-                    break;
-                case'mInter':
-                    this._mInter = param[i].checked;
-                    break;
+        // Extraction des valeurs
+        if (param instanceof NodeList || Array.isArray(param)) {
+            // Cas d'une liste d'inputs HTML
+            for (let i = 0; i < param.length; i++) {
+                const input = param[i];
+                const { name, value, checked, type } = input;
+                const key = name || input.id;
+
+                if (type === 'checkbox') {
+                    this.#params[key] = checked;
+                } else if (key in this.#params) {
+                    this.#params[key] = parseInt(value, 10) || 0;
+                }
             }
-        }
-        if (this._iteration === -1) {
-            this._validerBilan()
-        } else {
-            this._validerBilanPasApas()
-        }
-        this._operationInterbancaireCentrale()
-
-        this._onFormValidate()
-    }
-
-    _loadFramework() {
-        let choix = 'getListComplete'
-        this.model = new Framework(this._mtE1, this._mtE2, this._txProfit, this._mtAmortit, this._xport, this._mport);
-        // console.log(eval(`this.model.${choix}()`))
-        return this._lesOperations = eval(`this.model.${choix}()`);
-
-    }
-
-    _validerOperation(operation, acheteur, vendeur, montant) {
-        return eval(`this._operation.${operation}(acheteur, vendeur, montant)`)
-    }
-
-    _validerBilan() {
-        let acheteur = ''
-        let vendeur = ''
-        const lesOperations = this._loadFramework()
-
-        for (let uneOperation of lesOperations) {
-            // console.log(uneOperation)
-            acheteur = this._operation.find(uneOperation.acheteur)
-            //console.log(acheteur)
-            vendeur = this._operation.find(uneOperation.vendeur)
-            //console.log(vendeur)
-            //console.log(uneOperation.operation)
-            this._validerOperation(uneOperation.operation, acheteur, vendeur, uneOperation.montant)
-
-        }
-        //console.log(this._operation.getInfos)
-    }
-
-    _validerBilanPasApas() {
-        let acheteur = ''
-        let vendeur = ''
-        const lesOperations = this._loadFramework()
-
-        if (this._iteration < lesOperations.length) {
-            const uneOperation = lesOperations[this._iteration]
-            acheteur = this._operation.find(uneOperation.acheteur)
-            vendeur = this._operation.find(uneOperation.vendeur)
-            this._validerOperation(uneOperation.operation, acheteur, vendeur, uneOperation.montant)
-        } else {
-            this._iteration = -1
-        }
-        //console.log(this._operation.getInfos)
-    }
-
-    _listOperationPasApas() {
-        let lesOperationsPasApas = []
-        for (let i = 0; i < this._iteration + 1; i++) {
-            lesOperationsPasApas[i] = this._lesOperations[i]
-        }
-        return lesOperationsPasApas
-    }
-
-    get getOperationsAgents() {
-
-        //this.validerBilan()
-        return this._agentsList
-    }
-
-    get getOperationsComptes() {
-        return this._operation.getCN
-    }
-
-    get getLesOperations() {
-        if (this._iteration === -1) {
-            return this._lesOperations
-        } else {
-            return this._listOperationPasApas()
-        }
-
-    }
-
-    get getLesTypes() {
-        return this.model.getTypes
-    }
-
-    _operationInterbancaireCentrale() {
-        const banque = this._operation.find('B')
-        const montant = banque.getBCpassif - banque.getBCactif
-
-        if (montant > 0 && !this._mInter) {
-            const acheteur = this._operation.find('Rdm')
-            const vendeur = this._operation.find('E3')
-            //Achat de titre au pays débiteur
-           // this._validerOperation('AchatTitres', acheteur, vendeur, montant)
-            //Paiement de la position débitrice du pays
-            this._validerOperation('Paiement', acheteur, vendeur, montant)
-        }else if(montant > 0 && this._mInter){
-            //Réescompte du titre pour la position débitrice
-            const acheteur = this._operation.find('E1')
-            //Escompte du titre auprès de la banque centrale
-            this._validerOperation('ReEscompte', acheteur, 'BC', montant)
-        }
-    }
-
-    afficheroperation() {
-        console.log(this._agentsList)
-        for (let unagent of this._agentsList) {
-            console.log(`Le nom : ${unagent.getNom}`)
-            console.log('actif')
-            for (const property in unagent.getactif) {
-                console.log(`${property}: ${unagent.getactif[property]}`);
-            }
-            console.log('Passif')
-            for (const property in unagent.getpassif) {
-                console.log(`${property}: ${unagent.getpassif[property]}`);
-            }
-
-        }
-    }
-
-    updateAgentList(agent) {
-        for (let unagent of this._agentsList) {
-            if (agent.getNom === unagent.getNom) {
-                for (const property in unagent.getBilan) {
-                    console.log(`${property} : ${agent.getBilan[property]}`)
-                    console.log(`${property} : ${agent.getBilan[property]}`)
+        } else if (typeof param === 'object' && param !== null) {
+            // Cas d'un objet de données (ex: Sandbox)
+            for (const key in param) {
+                const value = param[key];
+                if (mode === 'sandbox') {
+                    // En mode Sandbox, on accepte toutes les clés (pour les sélections d'opérations)
+                    this.#params[key] = value;
+                } else if (key in this.#params) {
+                    this.#params[key] = value;
                 }
             }
         }
+
+        // Validation du bilan
+        if (this.eventHandler.iteration === -1) {
+            this.#validerBilan();
+        } else {
+            this.#validerBilanPasApas();
+        }
+
+        if (this.#params.mode !== 'sandbox') {
+            this.#operationInterbancaireCentrale();
+        }
+
+        // Déclencher l'événement de validation
+        this.#triggerFormValidate();
+    }
+
+    /**
+     * Déclenche le callback de validation
+     * @private
+     */
+    #triggerFormValidate() {
+        if (this.#onFormValidate) {
+            this.#onFormValidate();
+        }
+
+        const handler = this.eventHandler.get('formValidated');
+        if (handler && handler !== this.#onFormValidate) {
+            handler();
+        }
+    }
+
+    /**
+     * Charge le framework avec les paramètres actuels
+     * @returns {Array} Liste des opérations
+     */
+    #loadFramework() {
+        if (this.#params.mode === 'sandbox') {
+            console.log("appel:Load Framework (Sandbox) avec params:", this.#params);
+            this.model = new SandBoxFramework(this.#params, this.#operation);
+        } else {
+            const { mtE1, mtE2, txProfit, mtAmortit, xport, mport, mInter } = this.#params;
+            this.model = new CnFramework(mtE1, mtE2, txProfit, mtAmortit, xport, mport, mInter);
+        }
+
+        this.#lesOperations = this.model.getListComplete();
+        console.log("opérations générées:", this.#lesOperations);
+        return this.#lesOperations;
+    }
+
+    /**
+     * Exécute une opération
+     * @param {string} operation - Nom de l'opération
+     * @param {Object} acheteur - Agent acheteur
+     * @param {Object} vendeur - Agent vendeur
+     * @param {number} montant - Montant de l'opération
+     */
+    #validerOperation(operation, acheteur, vendeur, montant) {
+        if (typeof this.#operation[operation] === 'function') {
+            this.#operation[operation](acheteur, vendeur, montant);
+        }
+    }
+
+    /**
+     * Valide toutes les opérations du bilan
+     */
+    #validerBilan() {
+        const lesOperations = this.#loadFramework();
+
+        lesOperations.forEach(uneOperation => {
+            const acheteur = this.#operation.find(uneOperation.acheteur);
+            const vendeur = this.#operation.find(uneOperation.vendeur);
+
+            this.#validerOperation(
+                uneOperation.operation,
+                acheteur,
+                vendeur,
+                uneOperation.montant
+            );
+        });
+
+        if (this.#params.mode === 'sandbox') {
+            this.model.logBalances(this.#operation);
+        }
+    }
+
+    /**
+     * Valide les opérations pas à pas
+     */
+    #validerBilanPasApas() {
+        const lesOperations = this.#loadFramework();
+
+        if (this.eventHandler.iteration < lesOperations.length) {
+            const uneOperation = lesOperations[this.eventHandler.iteration];
+            const acheteur = this.#operation.find(uneOperation.acheteur);
+            const vendeur = this.#operation.find(uneOperation.vendeur);
+
+            this.#validerOperation(
+                uneOperation.operation,
+                acheteur,
+                vendeur,
+                uneOperation.montant
+            );
+
+            if (this.#params.mode === 'sandbox') {
+                this.model.logBalances(this.#operation);
+            }
+        } else {
+            this.eventHandler.iteration = -1;
+        }
+    }
+
+    /**
+     * Retourne la liste des opérations jusqu'à l'itération actuelle
+     * @returns {Array} Liste des opérations
+     */
+    #listOperationPasApas() {
+        return this.#lesOperations.slice(0, this.eventHandler.iteration + 1);
+    }
+
+    /**
+     * Gère les opérations interbancaires avec la banque centrale
+     */
+    #operationInterbancaireCentrale() {
+        const banque = this.#operation.find('B');
+        const montant = banque.getBCpassif - banque.getBCactif;
+
+        if (montant <= 0) return;
+
+        if (!this.#params.mInter) {
+            const acheteur = this.#operation.find('Rdm');
+            const vendeur = this.#operation.find('E3');
+            this.#validerOperation('Paiement', acheteur, vendeur, montant);
+        } else {
+            const acheteur = this.#operation.find('E1');
+            this.#validerOperation('ReEscompte', acheteur, 'BC', montant);
+        }
+    }
+
+    /**
+     * Affiche les opérations dans la console (debug)
+     */
+    afficherOperation() {
+        this.#agentsList.forEach(agent => {
+            console.log(`Le nom : ${agent.getNom}`);
+            console.log('Actif:', agent.getactif);
+            console.log('Passif:', agent.getpassif);
+        });
+    }
+
+    get getOperationsAgents() {
+        return this.#agentsList;
+    }
+
+    get getOperationsComptes() {
+        return this.#operation.getCN;
+    }
+
+    get getLesOperations() {
+        return this.eventHandler.iteration === -1
+            ? this.#lesOperations
+            : this.#listOperationPasApas();
+    }
+
+    get getLesTypes() {
+        return this.model.getTypes;
     }
 }
-
-export {Model}
