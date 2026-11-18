@@ -159,6 +159,11 @@ export class CnRenderer {
 
         // Lignes de données
         const bilanLength = Object.keys(agent.getactif).length;
+        console.table(agent.getBilan.map(row => {
+            const actifKey = Object.keys(row[0])[0];
+            const passifKey = Object.keys(row[1])[0];
+            return { actif: actifKey, 'actif val': row[0][actifKey], passif: passifKey, 'passif val': row[1][passifKey] };
+        }));
         for (let i = 0; i < bilanLength; i++) {
             const row = this.#createElement('tr');
 
@@ -198,6 +203,8 @@ export class CnRenderer {
 
         // Lignes d'opérations
         operations.forEach(operation => {
+            if (operation.montant <= 0) return;
+
             const row = this.#createElement('tr');
 
             if (types?.[operation.operation] === 'R') {

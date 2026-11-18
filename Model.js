@@ -79,7 +79,7 @@ export class Model {
      * @param {string} mode - Mode de fonctionnement ('modelcn' ou 'sandbox')
      */
     loadParam(param, iteration, mode = 'modelcn') {
-        console.log(`Model: loadParam (itération=${iteration}, mode=${mode})`, param);
+        //console.log(`Model: loadParam (itération=${iteration}, mode=${mode})`, param);
 
         this.eventHandler.iteration = iteration;
         this.#params.mode = mode;
@@ -155,7 +155,7 @@ export class Model {
         }
 
         this.#lesOperations = this.model.getListComplete();
-        console.log("opérations générées:", this.#lesOperations);
+        //console.log("opérations générées:", this.#lesOperations);
         return this.#lesOperations;
     }
 

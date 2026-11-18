@@ -81,7 +81,7 @@ export class Entreprise {
     #Stock(mont, sign) {
         const oldStock = this.#actif[ACCOUNTS.STOCK];
         this.#actif[ACCOUNTS.STOCK] += sign * mont;
-        console.log(`Entreprise ${this.#achtr}: Stock ${oldStock} -> ${this.#actif[ACCOUNTS.STOCK]} (sign=${sign}, mont=${mont})`);
+        //console.log(`Entreprise ${this.#achtr}: Stock ${oldStock} -> ${this.#actif[ACCOUNTS.STOCK]} (sign=${sign}, mont=${mont})`);
     }
 
     Banque(mont, sign) {

@@ -10,7 +10,11 @@ export class CnFramework {
 
     constructor(mtE1, mtE2, txProfit, mtAmortit = 0, mtXport, mtMport, mInter = false) {
         if ((txProfit >= 0 && txProfit <= 100) && (mtE1 >= mtE2)) {
-            this.mtE1 = (mtE1 - (3 * mtAmortit) - mtE2) / 2;//90
+            if (mtE2 === 0) {
+                this.mtE1 = mtE1 - (3 * mtAmortit);
+            } else {
+                this.mtE1 = (mtE1 - (3 * mtAmortit) - mtE2) / 2;
+            }
             this.mtE2 = mtE2;//25
             this.txProfit = txProfit / 100;
             this.prdAmortit = mtE1 - (3 * mtE2);
@@ -27,14 +31,14 @@ export class CnFramework {
         return [
             ...this.getListProfit(),
             ...this.getListInvest(),
-            ...this.getListAmort(),
+  /*          ...this.getListAmort(),
             ...this.getListXstd(),
-            ...(this.#mInter ? this.getListMint() : this.getListMstd())
+            ...(this.#mInter ? this.getListMint() : this.getListMstd())*/
         ]
     }
 
     getListProfit() {
-        console.log("profit" + this.mtE1);
+       // console.log("profit" + this.mtE1);
         return [//!*****************cycle profit***********************!/
             {
                 'operation': 'Production', 'acheteur': 'E1', 'vendeur': 'M', 'montant': this.mtE1

@@ -60,7 +60,7 @@ export class Operation {
     }
 
     ConsommationIntermediaire(ach, vdr, mt, txPrf = 0) {
-        console.log(`Operation: ConsommationIntermediaire(ach=${ach?.getNom}, vdr=${vdr?.getNom}, mt=${mt}, txPrf=${txPrf})`);
+       // console.log(`Operation: ConsommationIntermediaire(ach=${ach?.getNom}, vdr=${vdr?.getNom}, mt=${mt}, txPrf=${txPrf})`);
         if (vdr.getNom === AGENTS.M || ach.getNom === AGENTS.M) return "M ne peut pas figurer dans cette opération";
 
         ach.CI(vdr, mt, txPrf);
