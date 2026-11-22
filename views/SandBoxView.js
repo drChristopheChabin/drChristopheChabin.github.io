@@ -1,5 +1,5 @@
 import { View } from './View.js';
-import { FormBuilder } from './FormBuilder.js';
+import { FormBuilder } from './components/FormBuilder.js';
 
 export class SandBoxView extends View {
     constructor() {

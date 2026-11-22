@@ -2,7 +2,16 @@ import { Operation } from './metier/Operation.js';
 import { ComptaNat } from './metier/ComptaNat.js';
 import { CnFramework } from './metier/CnFramework.js';
 import { SandBoxFramework } from './metier/SandBoxFramework.js';
-import { EventHandler } from './controllers/EventHandler.js';
+
+/**
+ * Cycles affichables seuls (mode 'cycles') : clé du formulaire → méthode de CnFramework
+ */
+const CYCLE_METHODS = {
+    profit: 'getListProfit',
+    invest: 'getListInvest',
+    amort: 'getListAmort',
+    xstd: 'getListXstd'
+};
 
 /**
  * @property {Object} #operation
@@ -18,14 +27,22 @@ export class Model {
     #lesOperations;
     #params;
     #onFormValidate;
+    #iteration;
+    /** Mode 'cycles' : opérations des cycles précédents, conservées jusqu'au RAZ */
+    #historique = [];
+    /** Mode 'cycles' : cycle actuellement affiché */
+    #cycleCourant = null;
 
-    constructor() {
+    /**
+     * @param {string} mode - Mode de fonctionnement fourni par la route ('modelcn' ou 'sandbox')
+     */
+    constructor(mode = 'modelcn') {
         this.#operation = new Operation();
         this.#agentsList = this.#operation.getAgents;
         this.#staticList = new ComptaNat();
         this.#lesOperations = [];
         this.model = null;
-        this.eventHandler = new EventHandler();
+        this.#iteration = -1;
 
         // Paramètres par défaut
         this.#params = {
@@ -36,7 +53,8 @@ export class Model {
             xport: 0,
             mport: 0,
             mInter: false,
-            mode: 'modelcn'
+            cycle: 'profit',
+            mode
         };
         // Callbacks
         this.#onFormValidate = null;
@@ -46,10 +64,7 @@ export class Model {
      * Réinitialise l'état du modèle
      */
     reset() {
-        this.#operation = new Operation();
-        this.#agentsList = this.#operation.getAgents;
-        this.#staticList = new ComptaNat();
-        this.#lesOperations = [];
+        this.#resetState();
         const currentMode = this.#params.mode;
         this.#params = {
             mtE1: 0,
@@ -59,9 +74,25 @@ export class Model {
             xport: 0,
             mport: 0,
             mInter: false,
+            cycle: 'profit',
             mode: currentMode
         };
-        this.eventHandler.iteration = -1;
+        this.#iteration = -1;
+        this.#historique = [];
+        this.#cycleCourant = null;
+    }
+
+    /**
+     * Repart de bilans vierges (agents, TEE, TOF) sans toucher aux paramètres.
+     * Indispensable avant un recalcul complet : sinon les opérations sont
+     * rejouées par-dessus les soldes du calcul précédent.
+     * @private
+     */
+    #resetState() {
+        this.#operation = new Operation();
+        this.#agentsList = this.#operation.getAgents;
+        this.#staticList = new ComptaNat();
+        this.#lesOperations = [];
     }
 
     /**
@@ -75,14 +106,19 @@ export class Model {
     /**
      * Charge les paramètres depuis le formulaire
      * @param {NodeList} param - Liste des inputs du formulaire
-     * @param {number} iteration - Numéro d'itération
-     * @param {string} mode - Mode de fonctionnement ('modelcn' ou 'sandbox')
+     * @param {number} iteration - Numéro d'itération (-1 = calcul complet)
      */
-    loadParam(param, iteration, mode = 'modelcn') {
-        //console.log(`Model: loadParam (itération=${iteration}, mode=${mode})`, param);
+    loadParam(param, iteration = -1) {
+        const mode = this.#params.mode;
+        // Opérations du cycle affiché jusqu'ici (avant prise en compte du nouvel envoi)
+        const operationsPrecedentes = this.#operationsCourantes();
+        this.#iteration = iteration;
 
-        this.eventHandler.iteration = iteration;
-        this.#params.mode = mode;
+        // Calcul complet ou 1re étape du pas à pas : on repart de zéro
+        // (en mode 'cycles', tout est rejoué à chaque envoi, cf. #validerCycles)
+        if (iteration <= 0 || mode === 'cycles') {
+            this.#resetState();
+        }
 
         // Extraction des valeurs
         if (param instanceof NodeList || Array.isArray(param)) {
@@ -94,6 +130,8 @@ export class Model {
 
                 if (type === 'checkbox') {
                     this.#params[key] = checked;
+                } else if (type === 'select-one') {
+                    this.#params[key] = value;
                 } else if (key in this.#params) {
                     this.#params[key] = parseInt(value, 10) || 0;
                 }
@@ -112,7 +150,14 @@ export class Model {
         }
 
         // Validation du bilan
-        if (this.eventHandler.iteration === -1) {
+        if (mode === 'cycles') {
+            // Changement de cycle : le cycle précédent passe dans l'historique
+            if (this.#cycleCourant !== null && this.#params.cycle !== this.#cycleCourant) {
+                this.#historique.push(...operationsPrecedentes);
+            }
+            this.#cycleCourant = this.#params.cycle;
+            this.#validerCycles();
+        } else if (this.#iteration === -1) {
             this.#validerBilan();
         } else {
             this.#validerBilanPasApas();
@@ -134,11 +179,6 @@ export class Model {
         if (this.#onFormValidate) {
             this.#onFormValidate();
         }
-
-        const handler = this.eventHandler.get('formValidated');
-        if (handler && handler !== this.#onFormValidate) {
-            handler();
-        }
     }
 
     /**
@@ -154,7 +194,12 @@ export class Model {
             this.model = new CnFramework(mtE1, mtE2, txProfit, mtAmortit, xport, mport, mInter);
         }
 
-        this.#lesOperations = this.model.getListComplete();
+        if (this.#params.mode === 'cycles') {
+            const method = CYCLE_METHODS[this.#params.cycle] ?? CYCLE_METHODS.profit;
+            this.#lesOperations = this.model[method]();
+        } else {
+            this.#lesOperations = this.model.getListComplete();
+        }
         //console.log("opérations générées:", this.#lesOperations);
         return this.#lesOperations;
     }
@@ -196,13 +241,45 @@ export class Model {
     }
 
     /**
+     * Mode 'cycles' : rejoue sur des bilans vierges les cycles précédents
+     * puis le cycle courant (en entier, ou jusqu'à l'étape du pas à pas).
+     * @private
+     */
+    #validerCycles() {
+        const lesOperations = this.#loadFramework();
+
+        if (this.#iteration >= lesOperations.length) {
+            this.#iteration = -1;
+        }
+
+        [...this.#historique, ...this.#operationsCourantes()].forEach(uneOperation => {
+            this.#validerOperation(
+                uneOperation.operation,
+                this.#operation.find(uneOperation.acheteur),
+                this.#operation.find(uneOperation.vendeur),
+                uneOperation.montant
+            );
+        });
+    }
+
+    /**
+     * Opérations du cycle courant déjà jouées (toutes, ou jusqu'à l'étape du pas à pas)
+     * @private
+     */
+    #operationsCourantes() {
+        return this.#iteration === -1
+            ? this.#lesOperations
+            : this.#listOperationPasApas();
+    }
+
+    /**
      * Valide les opérations pas à pas
      */
     #validerBilanPasApas() {
         const lesOperations = this.#loadFramework();
 
-        if (this.eventHandler.iteration < lesOperations.length) {
-            const uneOperation = lesOperations[this.eventHandler.iteration];
+        if (this.#iteration < lesOperations.length) {
+            const uneOperation = lesOperations[this.#iteration];
             const acheteur = this.#operation.find(uneOperation.acheteur);
             const vendeur = this.#operation.find(uneOperation.vendeur);
 
@@ -217,7 +294,7 @@ export class Model {
                 this.model.logBalances(this.#operation);
             }
         } else {
-            this.eventHandler.iteration = -1;
+            this.#iteration = -1;
         }
     }
 
@@ -226,7 +303,7 @@ export class Model {
      * @returns {Array} Liste des opérations
      */
     #listOperationPasApas() {
-        return this.#lesOperations.slice(0, this.eventHandler.iteration + 1);
+        return this.#lesOperations.slice(0, this.#iteration + 1);
     }
 
     /**
@@ -267,10 +344,18 @@ export class Model {
         return this.#operation.getCN;
     }
 
+    get getIteration() {
+        return this.#iteration;
+    }
+
+    /**
+     * Opérations affichées : uniquement celles du cycle courant
+     * (les cycles précédents restent pris en compte dans les calculs).
+     * En mode 'cycles', affichées dans l'ordre inverse (la plus récente en haut).
+     */
     get getLesOperations() {
-        return this.eventHandler.iteration === -1
-            ? this.#lesOperations
-            : this.#listOperationPasApas();
+        const operations = this.#operationsCourantes();
+        return this.#params.mode === 'cycles' ? [...operations].reverse() : operations;
     }
 
     get getLesTypes() {

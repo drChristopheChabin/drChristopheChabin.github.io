@@ -50,7 +50,7 @@ export const OperationType = Object.freeze({
 export const OperationClassifications = Object.freeze({
     [OperationType.PRODUCTION]: 'R',
     [OperationType.INTERMEDIATE_CONSUMPTION]: 'R',
-    [OperationType.CI_FINANCING]: 'M', // Modifié de R à M
+    [OperationType.CI_FINANCING]: 'R',
     [OperationType.WAGES]: 'R',
     [OperationType.CONSUMPTION]: 'R',
     [OperationType.SECURITIES_PURCHASE]: 'M', // Modifié de R à M
@@ -61,7 +61,7 @@ export const OperationClassifications = Object.freeze({
     [OperationType.PAYMENT]: 'M',
     [OperationType.CREDIT]: 'M',
     [OperationType.REDISCOUNT]: 'M', // Ajouté
-    [OperationType.BANK_REPAYMENT]: 'M', // Modifié de R à M
+    [OperationType.BANK_REPAYMENT]: 'R',
     [OperationType.INTERNATIONAL_SETTLEMENT]: 'M',
     [OperationType.INTERNATIONAL_DISCOUNT]: 'M',
     [OperationType.EXPORTATION]: 'R',

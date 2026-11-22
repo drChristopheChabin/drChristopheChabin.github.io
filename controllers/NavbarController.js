@@ -1,51 +1,27 @@
 import { NavbarView } from '../views/NavbarView.js';
-import { Model } from '../Model.js';
-import { View } from '../views/View.js';
-import { CnView } from '../views/CnView.js';
-import { CnController } from './CnController.js';
-import { SandBoxController } from './SandBoxController.js';
-import { SandBoxView } from '../views/SandBoxView.js';
 
+/**
+ * Contrôleur de la barre de navigation.
+ * Il ne choisit plus l'écran à afficher : c'est le rôle du routeur.
+ */
 export class NavbarController {
-    constructor() {
-        this.navbarView = new NavbarView();
-        this.init();
+    /**
+     * @param {Object} options
+     * @param {Array} options.routes - Routes affichées dans le menu
+     * @param {Function} options.onBrandClick - Action du clic sur le logo
+     */
+    constructor({ routes, onBrandClick }) {
+        this.view = new NavbarView();
+        this.view.render(routes);
+        this.view.bindLinkClick();
+        this.view.bindBrandClick(onBrandClick);
     }
 
-    init() {
-        // Rendre la navbar
-        this.navbarView.render();
-
-        // Lier les événements de la navbar
-        this.navbarView.bindThemeChange(this.handleThemeChange);
-        this.navbarView.bindBrandClick(this.handleReset);
-
-        // Initialisation par défaut (Modélisation)
-        this.handleThemeChange('modelcn');
-    }
-
-    handleReset = () => {
-        window.location.reload();
-    }
-
-    handleThemeChange = (theme) => {
-        console.log(`Changement de thème/mode : ${theme}`);
-
-        // Nettoyage systématique du root avant de changer de mode
-        const root = document.querySelector('#root');
-        if (root) root.innerHTML = '';
-
-        if (theme === 'modelcn') {
-            // Initialiser le MVC principal (Modélisation)
-            this.model = new Model();
-            this.view = new CnView(); // Utilisation de CnView
-            this.mainController = new CnController(this.model, this.view);
-        } else if (theme === 'sandbox') {
-            // Initialiser le mode SandBox
-            this.model = new Model();
-            this.view = new SandBoxView(); // Utilisation de SandBoxView
-            this.sandboxController = new SandBoxController(this.model, this.view);
-            this.sandboxController.init();
-        }
+    /**
+     * Met en évidence le lien de la route active (appelé par le routeur)
+     * @param {string} path
+     */
+    setActive(path) {
+        this.view.setActiveLink(path);
     }
 }

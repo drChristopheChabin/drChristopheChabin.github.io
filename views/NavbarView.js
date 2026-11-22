@@ -3,21 +3,28 @@ export class NavbarView {
     this.container = document.querySelector('.container');
   }
 
-  render() {
+  /**
+   * Affiche la navbar ; les liens sont générés à partir des routes
+   * @param {Array<{path: string, title: string}>} routes
+   */
+  render(routes) {
+    const links = routes
+      .map(r => `<a class="nav-link" href="#${r.path}" data-path="${r.path}">${r.title}</a>`)
+      .join('\n                ');
+
     const navHTML = `
         <nav class="navbar navbar-expand-lg bg-dark navbar-dark mb-4">
           <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-              <img src="./favicon.png" alt="favicon" width="32" height="32">
+            <a class="navbar-brand" href="#${routes[0]?.path ?? ''}">
+              <img src="./assets/favicon.png" alt="favicon" width="32" height="32">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
               <div class="navbar-nav">
-                <a class="nav-link" href="readme.html" target="_blank" data-theme="readme">Documentation</a>
-                <a class="nav-link active" href="#" data-theme="modelcn">Modélisation</a>
-                <a class="nav-link" href="#" data-theme="sandbox">SandBox</a>
+                <a class="nav-link" href="docs/readme.html" target="_blank">Documentation</a>
+                ${links}
               </div>
             </div>
           </div>
@@ -28,40 +35,44 @@ export class NavbarView {
     this.nav = this.container.querySelector('nav');
   }
 
-  bindThemeChange(handler) {
+  /**
+   * Ferme le menu replié (mobile) après un clic sur un lien.
+   * La navigation elle-même est faite par le navigateur (changement de hash).
+   */
+  bindLinkClick() {
     this.nav.addEventListener('click', e => {
-      const link = e.target.closest('.nav-link');
-      if (!link || link.getAttribute('data-theme') === 'readme') return;
-
-      e.preventDefault();
-
-      // Masquer le menu collapse sur mobile après clic
-      const navbarCollapse = this.nav.querySelector('.navbar-collapse');
-      if (navbarCollapse.classList.contains('show')) {
-        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-        if (bsCollapse) bsCollapse.hide();
-      }
-
-      const theme = link.getAttribute('data-theme');
-      this.#setActiveLink(link);
-      handler(theme);
+      if (!e.target.closest('.nav-link')) return;
+      this.#closeCollapse();
     });
   }
 
   bindBrandClick(handler) {
     const brand = this.nav.querySelector('.navbar-brand');
-    if (brand) {
+    if (brand && handler) {
       brand.addEventListener('click', e => {
         e.preventDefault();
+        this.#closeCollapse();
         handler();
       });
     }
   }
 
-  #setActiveLink(activeLink) {
-    this.nav.querySelectorAll('.nav-link').forEach(link => {
-      link.classList.remove('active');
+  /**
+   * @param {string} path - Chemin de la route active
+   */
+  setActiveLink(path) {
+    this.nav.querySelectorAll('.nav-link[data-path]').forEach(link => {
+      const isActive = link.dataset.path === path;
+      link.classList.toggle('active', isActive);
+      if (isActive) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
     });
-    activeLink.classList.add('active');
+  }
+
+  #closeCollapse() {
+    const navbarCollapse = this.nav.querySelector('.navbar-collapse');
+    if (navbarCollapse?.classList.contains('show') && window.bootstrap) {
+      window.bootstrap.Collapse.getInstance(navbarCollapse)?.hide();
+    }
   }
 }

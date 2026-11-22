@@ -1,4 +1,4 @@
-import { CnRenderer } from './CnRenderer.js';
+import { CnRenderer } from './components/CnRenderer.js';
 
 export class View {
     constructor() {
@@ -71,11 +71,24 @@ export class View {
     }
 
     /**
-     * Récupère les données du formulaire
+     * Branche les événements du formulaire sur les gestionnaires du contrôleur.
+     * La vue écoute le DOM ; le contrôleur décide quoi faire.
+     * @param {Function} onSubmit - Appelé avec (inputs, action) ; action = id du bouton cliqué ('envoyer', 'pasApas')
+     * @param {Function} onReset - Appelé lors de la réinitialisation du formulaire
      */
-    get _agregatData() {
-        // console.log(document.querySelectorAll("input"))
-        return document.querySelectorAll("input")
+    bindForm(onSubmit, onReset) {
+        if (!this.form) {
+            console.error('Formulaire non disponible pour lier les événements');
+            return;
+        }
+
+        this.form.addEventListener('submit', event => {
+            event.preventDefault();
+            const action = event.submitter?.id ?? document.activeElement?.id ?? '';
+            onSubmit(this.form.querySelectorAll('input, select'), action);
+        });
+
+        this.form.addEventListener('reset', () => onReset());
     }
 
     /**

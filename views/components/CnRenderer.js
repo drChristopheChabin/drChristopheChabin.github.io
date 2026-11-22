@@ -203,7 +203,8 @@ export class CnRenderer {
 
         // Lignes d'opérations
         operations.forEach(operation => {
-            if (operation.montant <= 0) return;
+            // On masque les montants nuls, mais pas les négatifs (contrepassations)
+            if (!operation.montant) return;
 
             const row = this.#createElement('tr');
 

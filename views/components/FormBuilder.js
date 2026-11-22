@@ -60,6 +60,34 @@ export class FormBuilder {
         return this;
     }
 
+    /**
+     * Ajoute une liste déroulante
+     * @param {Object} config
+     * @param {Array<{value: string, text: string}>} config.options
+     */
+    addSelect(config) {
+        const { id, name, label, options = [], defaultValue } = config;
+
+        const labelEl = this.createElement('label', 'form-label');
+        labelEl.setAttribute('for', id);
+        labelEl.textContent = label;
+
+        const selectEl = this.createElement('select', 'form-select');
+        selectEl.name = name;
+        selectEl.id = id;
+
+        options.forEach(({ value, text }) => {
+            const optionEl = document.createElement('option');
+            optionEl.value = value;
+            optionEl.textContent = text;
+            if (value === defaultValue) optionEl.defaultSelected = true;
+            selectEl.appendChild(optionEl);
+        });
+
+        this.fields.push({ type: 'text', label: labelEl, input: selectEl });
+        return this;
+    }
+
     addButtonGroup(buttons) {
         const group = this.createElement('div', 'btn-group mt-3');
         group.setAttribute('role', 'group');

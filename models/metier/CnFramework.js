@@ -31,8 +31,8 @@ export class CnFramework {
         return [
             ...this.getListProfit(),
             ...this.getListInvest(),
-  /*          ...this.getListAmort(),
-            ...this.getListXstd(),
+           ...this.getListAmort(),
+           /*  ...this.getListXstd(),
             ...(this.#mInter ? this.getListMint() : this.getListMstd())*/
         ]
     }
@@ -95,9 +95,16 @@ export class CnFramework {
             {
                 'operation': 'Production', 'acheteur': 'E2', 'vendeur': 'M', 'montant': this.mtE2 * (1 - this.txProfit)
             }, {
-                'operation': 'Paiement', 'acheteur': 'E2', 'vendeur': 'M', 'montant': this.mtE2 * (1 - this.txProfit)
-            }, {
                 'operation': 'RevenusSal', 'acheteur': 'M', 'vendeur': 'E2', 'montant': this.mtE2 * (1 - this.txProfit)
+            }, {
+                'operation': 'Paiement', 'acheteur': 'E2', 'vendeur': 'M', 'montant': this.mtE2 * (1 - this.txProfit)
+            },{
+                'operation': 'Consommation',
+                'acheteur': 'M',
+                'vendeur': 'E2',
+                'montant': this.mtE2 * (1 - this.txProfit)
+            }, {
+                'operation': 'Paiement', 'acheteur': 'M', 'vendeur': 'E2', 'montant': this.mtE2 * (1 - this.txProfit)
             },
 
             {
@@ -105,15 +112,8 @@ export class CnFramework {
             }, {
                 'operation': 'FiCI', 'acheteur': 'E1', 'vendeur': 'E2', 'montant': this.mtE2 * (1 - this.txProfit)
             }, {
-                'operation': 'Consommation',
-                'acheteur': 'M',
-                'vendeur': 'E2',
-                'montant': this.mtE2 * (1 - this.txProfit)
-            }, {
-                'operation': 'Paiement', 'acheteur': 'M', 'vendeur': 'E2', 'montant': this.mtE2 * (1 - this.txProfit)
-            }, {
                 'operation': 'Paiement', 'acheteur': 'E2', 'vendeur': 'E1', 'montant': this.mtE2 * (1 - this.txProfit)
-            }, {
+            },  {
                 'operation': 'AchatTitres', 'acheteur': 'M', 'vendeur': 'E1', 'montant': this.mtE2 * (1 - this.txProfit)
             }, {
                 'operation': 'Credit', 'acheteur': 'M', 'vendeur': 'E1', 'montant': this.mtE2 * (1 - this.txProfit)
@@ -221,7 +221,7 @@ export class CnFramework {
                 'acheteur': 'M',
                 'vendeur': 'E2',
                 'montant': this.mtAmortit * 2
-            },// E2 achète des immobilisation - amortissement réel
+            },// E2 achète des immobilisations - amortissement réel
             {
                 'operation': 'AchatImmob',
                 'acheteur': 'E2',
@@ -239,13 +239,13 @@ export class CnFramework {
                 'operation': 'RemboursementBq', 'acheteur': 'E1', 'vendeur': 'E1', 'montant': this.mtAmortit
             },*/{
                 'operation': 'RemboursementBq', 'acheteur': 'E2', 'vendeur': 'E2', 'montant': this.mtAmortit * 2
-            }, {
-                'operation': 'RemboursementBq', 'acheteur': 'M', 'vendeur': 'M', 'montant': this.mtAmortit * -1
-            }, {
+            },  {
                 'operation': 'Credit',
                 'acheteur': 'E2',
                 'vendeur': 'E2',
                 'montant': this.mtAmortit * (1 - this.txProfit) * -1
+            },{
+                'operation': 'RemboursementBq', 'acheteur': 'M', 'vendeur': 'M', 'montant': this.mtAmortit * -1
             },// // Production duale E1
             {
                 'operation': 'Production',
@@ -267,7 +267,7 @@ export class CnFramework {
                 'operation': 'AchatTitres', 'acheteur': 'M', 'vendeur': 'E2', 'montant': this.mtAmortit
             }, {
                 'operation': 'Paiement', 'acheteur': 'M', 'vendeur': 'E2', 'montant': this.mtAmortit
-            },// E2 achète des immobilisation - amortissement réel
+            },// E2 achète des immobilisations - amortissement réel
             {
                 'operation': 'AchatImmob',
                 'acheteur': 'E2',
@@ -346,7 +346,7 @@ export class CnFramework {
     }
 
     /*
-    * Importation nette monnaie international
+    * Importation nette monnaie internationale
     */
     getListMint() {
         if (this.mport <= 0) return [];
