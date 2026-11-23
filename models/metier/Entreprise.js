@@ -26,8 +26,8 @@ export class Entreprise {
     constructor(achtr, colonneTof) {
         this.#achtr = achtr;
         this.#colonneTof = colonneTof;
-        // Bdm is the financial institution for Bqm (Rdm)
-        this.#bqLoc = (this.#achtr === AGENTS.RDM) ? AGENTS.BDM : AGENTS.B;
+        // BCdm is the financial institution for Bqm (Rdm)
+        this.#bqLoc = (this.#achtr === AGENTS.RDM) ? AGENTS.BCdm : AGENTS.B;
     }
 
     // --- Getters ---

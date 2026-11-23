@@ -10,7 +10,7 @@ const CYCLE_METHODS = {
     profit: 'getListProfit',
     invest: 'getListInvest',
     amort: 'getListAmort',
-    xstd: 'getListXstd'
+    xstd: 'getListInternat'
 };
 
 /**
@@ -163,7 +163,10 @@ export class Model {
             this.#validerBilanPasApas();
         }
 
-        if (this.#params.mode !== 'sandbox') {
+        // Règlement interbancaire automatique : uniquement en mode 'modelcn'.
+        // En 'sandbox' et 'cycles', les opérations affichées sont les seules jouées
+        // (sinon un Paiement Rdm → E3 caché fausse les bilans du cycle international).
+        if (this.#params.mode === 'modelcn') {
             this.#operationInterbancaireCentrale();
         }
 

@@ -102,7 +102,7 @@ export class View {
     displayMicro(agents) {
         agents.forEach(agent => {
             // Toujours afficher les agents principaux (E1-E3, M, B)
-            // Pour les autres (Rdm, Bdm, BC), n'afficher que s'ils ont une activité (bilan non nul)
+            // Pour les autres (Rdm, BCdm, BC), n'afficher que s'ils ont une activité (bilan non nul)
             const primaryAgents = ['E1', 'E2', 'E3', 'M', 'B'];
             const isPrimary = primaryAgents.includes(agent.getNom);
 

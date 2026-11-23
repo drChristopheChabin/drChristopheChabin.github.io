@@ -38,7 +38,7 @@ export class Operation {
             new Entreprise(AGENTS.M, CATEGORIES.MENAGE),
             new Entreprise(AGENTS.RDM, CATEGORIES.EXTERIEUR),
             new Banque(AGENTS.B),
-            new Banque(AGENTS.BDM),
+            new Banque(AGENTS.BCdm),
             new Banque(AGENTS.BC)
         ];
         agents.forEach(agent => this.#agentsList.set(agent.getNom, agent));
@@ -239,26 +239,26 @@ export class Operation {
 
     *Si BC est créditeur net, il affecte cette monnaie aux réserves
      */
-    // FiReglementInt(ach=AGENTS.BDM, vdr, mt, txPrf)
+    // FiReglementInt(ach=AGENTS.BCdm, vdr, mt, txPrf)
     FiReglementInternational(ach, vdr, mt, txPrf = 0) {
-        // vdr est E3, ach est Bdm (agent)
+        // vdr est E3, ach est BCdm (agent)
         // E3 : Actif T 100, Passif K 100
-        vdr.VendreTitres(mt);
+       // vdr.VendreTitres(mt);
 
         // Mouvements bancaires corrigés
         const bqv = this.find(vdr.getBanque); // Banque du vendeur (B)
-        const bqa = this.find(AGENTS.BDM);    // Banque de l'acheteur (Bdm)
+        const bqa = this.find(AGENTS.BCdm);    // Banque de l'acheteur (BCdm)
         const bc = this.find(AGENTS.BC);      // Banque Centrale (BC)
 
         // B : Actif BC 100, Passif E3 100
         bqv.BanqueFinActif(AGENTS.BC, mt);
         bqv.BanqueFinPassif(vdr.getNom, mt);
 
-        // Bdm : Actif Bfi 100, Passif BC 100
-        bqa.BanqueFinActif('Bfi', mt);
+        // BCdm : Actif Bdm 100, Passif BC 100
+        bqa.BanqueFinActif('Bdm', mt);
         bqa.BanqueFinPassif(AGENTS.BC, mt);
 
-        // BC : Actif Bdm 100, Passif B 100
+        // BC : Actif BCdm 100, Passif B 100
         bc.BanqueFinActif(bqa.getNom, mt);
         bc.BanqueFinPassif(bqv.getNom, mt);
 
@@ -271,25 +271,56 @@ export class Operation {
         return true;
     }
     /*
+    * Règlement international en situation d'excédent (sens inverse de FiReglementInternational) :
+    * E3 (acheteur) règle BCdm (vendeur) ; la monnaie sort de B vers BCdm via BC.
+    * ÉCRITURES À VALIDER : symétriques de FiReglementInternational.
+     */
+    FiReglementInternationalExcedent(ach, vdr, mt) {
+        // ach est E3, vdr est BCdm (agent)
+        const bqa = this.find(ach.getBanque); // Banque de l'acheteur (B)
+        const bqv = this.find(AGENTS.BCdm);   // Banque du vendeur (BCdm)
+        const bc = this.find(AGENTS.BC);      // Banque Centrale (BC)
+
+        // B : Passif E3 -mt, Passif BC +mt
+        bqa.BanqueFinActif(ach.getNom, mt);
+        bqa.BanqueFinPassif(AGENTS.BC, mt);
+
+        // BC : Actif B +mt, Passif BCdm +mt
+        bc.BanqueFinActif(bqa.getNom, mt);
+        bc.BanqueFinPassif(bqv.getNom, mt);
+
+        // BCdm : Actif BC +mt, Passif Bdm +mt
+        bqv.BanqueFinActif(AGENTS.BC, mt);
+        bqv.BanqueFinPassif('Bdm', mt);
+
+        // TOF
+        this.#CN.actif_TOF(AGENTS.BC, mt, 1);               // BC debiteur
+        this.#CN.passif_TOF(AGENTS.BC, mt, 1);              // BC crediteur
+        this.#CN.actif_TOF(CATEGORIES.EXTERIEUR, mt, 1);    // EXT : dépôts reçus
+        this.#CN.actif_TOF(CATEGORIES.ENREPRISE, mt, -1);   // E : dépôts diminuent
+
+        return true;
+    }
+    /*
     *Situation de monnaie internationale
-    *le rdm vends des titres et paie l'interbancaire pour le reglement
+    *le rdm vend des titres et paie l'interbancaire pour le règlement
      */
     FIEscompteInternational(ach, vdr, mt, txPrf = 0) {
-        const mtEscompte = mt * 0.1; // 100 -> 10 as per user example
+        const mtEscompte = mt;
 
         const bqv = this.find(vdr.getBanque); // Banque B
-        const bqa = this.find(AGENTS.BDM);    // Banque Bdm
+        const bqa = this.find(AGENTS.BCdm);    // Banque BCdm
         const bc = this.find(AGENTS.BC);      // Banque Centrale
 
         // B : Actif E3 -100, Actif BC 100
         bqv.BanqueFinActif(vdr.getNom, -mt);
         bqv.BanqueFinActif(AGENTS.BC, mt);
 
-        // Bdm : Actif bfi 10, Passif BC 10
-        bqa.BanqueFinActif('Bfi', mtEscompte);
+        // BCdm : Actif Bdm 10, Passif BC 10
+        bqa.BanqueFinActif('Bdm', mtEscompte);
         bqa.BanqueFinPassif(AGENTS.BC, mtEscompte);
 
-        // BC : Passif B 100, Actif Bdm 10
+        // BC : Passif B 100, Actif BCdm 10
         bc.BanqueFinPassif(bqv.getNom, mt);
         bc.BanqueFinActif(bqa.getNom, mtEscompte);
 
@@ -315,4 +346,87 @@ export class Operation {
         this.FiCI(vdr, ach, mt, txPrf)
         return this.Credit(ach, vdr, mt, txPrf);
     }
+
+    /*
+    * Crédit international : crédit entre une entreprise et le reste du monde
+    * (passe par B, BCdm et BC, cf. branche Rdm de Credit)
+     */
+    CreditInternational(ach, vdr, mt) {
+        if (ach.getNom !== AGENTS.RDM && vdr.getNom !== AGENTS.RDM) return "Rdm doit figurer dans cette opération";
+        return this.Credit(ach, vdr, mt);
+    }
+
+    /*
+    * Remboursement de crédit : BC ou BCdm efface une écriture « BC »
+    * face à E3 ou Rdm, dans les livres de la banque de cet agent
+    * (B pour E3, BCdm pour Rdm).
+    *  - l'agent est débiteur (actif agent / passif BC)  -> on diminue les deux
+    *  - l'agent est créancier (actif BC / passif agent) -> on diminue les deux
+    * Le montant est plafonné au solde existant.
+    * TOF : comme Credit, seul le côté E3 (colonne E) y figure.
+     */
+    RembCredit(ach, vdr, mt) {
+        const banques = [AGENTS.BC, AGENTS.BCdm];
+        const agents = [AGENTS.E3, AGENTS.RDM];
+
+        let agent;
+        if (banques.includes(ach?.getNom) && agents.includes(vdr?.getNom)) agent = vdr;
+        else if (banques.includes(vdr?.getNom) && agents.includes(ach?.getNom)) agent = ach;
+        else return "RembCredit : BC ou BCdm face à E3 ou Rdm";
+
+        const bq = this.find(agent.getBanque);
+        const nom = agent.getNom;
+        const passifBC = bq.getpassif[AGENTS.BC] || 0;
+        const actifBC = bq.getactif[AGENTS.BC] || 0;
+        const tof = agent.getColonneTOF === CATEGORIES.ENREPRISE;
+
+        if (passifBC > 0 && (bq.getactif[nom] || 0) > 0) {
+            // l'agent doit à sa banque, qui se refinance auprès de BC
+            const m = Math.min(mt, passifBC, bq.getactif[nom]);
+            bq.BanqueFinPassif(AGENTS.BC, -m);
+            bq.BanqueFinActif(nom, -m);
+            if (tof) {
+                this.#CN.passif_TOF(agent.getColonneTOF, m, -1);
+                this.#CN.actif_TOF(AGENTS.BC, m, -1);
+            }
+        } else if (actifBC > 0 && (bq.getpassif[nom] || 0) > 0) {
+            // la banque détient une créance sur BC en contrepartie du dépôt de l'agent
+            const m = Math.min(mt, actifBC, bq.getpassif[nom]);
+            bq.BanqueFinActif(AGENTS.BC, -m);
+            bq.BanqueFinPassif(nom, -m);
+            if (tof) {
+                this.#CN.actif_TOF(agent.getColonneTOF, m, -1);
+                this.#CN.passif_TOF(AGENTS.BC, m, -1);
+            }
+        } else {
+            return `RembCredit : aucune écriture BC face à ${nom} chez ${bq.getNom}`;
+        }
+        return true;
+    }
+
+    /*
+    * Remboursement de crédit côté BCdm, dans les livres de BCdm :
+    *  - BCdm/BC face à BCdm/BC : compensation, BCdm diminue à la fois
+    *    son actif BC et son passif BC (plafonné au plus petit des deux).
+    *    Opération interbancaire : pas d'effet sur le TOF.
+    *  - BCdm/BC face à Rdm : efface l'écriture « BC » face à Rdm (cf. RembCredit).
+     */
+    RembCreditBCdm(ach, vdr, mt) {
+        const banques = [AGENTS.BCdm, AGENTS.BC];
+
+        if (banques.includes(ach?.getNom) && banques.includes(vdr?.getNom)) {
+            const BCdm = this.find(AGENTS.BCdm);
+            const m = Math.min(mt, BCdm.getBCactif, BCdm.getBCpassif);
+            if (m <= 0) return "RembCreditBCdm : BCdm n'a pas d'actif et de passif BC à compenser";
+            BCdm.BanqueFinActif(AGENTS.BC, -m);
+            BCdm.BanqueFinPassif(AGENTS.BC, -m);
+            return true;
+        }
+
+        const ok = (banques.includes(ach?.getNom) && vdr?.getNom === AGENTS.RDM)
+            || (banques.includes(vdr?.getNom) && ach?.getNom === AGENTS.RDM);
+        if (!ok) return "RembCreditBCdm : BCdm ou BC face à Rdm";
+        return this.RembCredit(ach, vdr, mt);
+    }
+
 }

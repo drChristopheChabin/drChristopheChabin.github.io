@@ -10,7 +10,7 @@ export const AGENTS = Object.freeze({
     M: 'M',
     RDM: 'Rdm',
     B: 'B',
-    BDM: 'Bdm',
+    BCdm: 'BCdm',
     BC: 'BC',
     B_CENTRAL: 'B_Central'
 });
@@ -41,7 +41,11 @@ export const OperationType = Object.freeze({
     X_FINANCING: 'FiX',
     IMPORTATION: 'Importation',
     M_FINANCING: 'FiM',
+    INTERNATIONAL_CREDIT: 'CreditInternational',
+    CREDIT_REPAYMENT: 'RembCredit',
+    CREDIT_REPAYMENT_BCdm: 'RembCreditBCdm',
     INTERNATIONAL_SETTLEMENT: 'FiReglementInternational',
+    INTERNATIONAL_SETTLEMENT_SURPLUS: 'FiReglementInternationalExcedent',
     INTERNATIONAL_DISCOUNT: 'FIEscompteInternational',
 });
 /**
@@ -63,11 +67,15 @@ export const OperationClassifications = Object.freeze({
     [OperationType.REDISCOUNT]: 'M', // Ajouté
     [OperationType.BANK_REPAYMENT]: 'R',
     [OperationType.INTERNATIONAL_SETTLEMENT]: 'M',
+    [OperationType.INTERNATIONAL_SETTLEMENT_SURPLUS]: 'M',
     [OperationType.INTERNATIONAL_DISCOUNT]: 'M',
     [OperationType.EXPORTATION]: 'R',
     [OperationType.IMPORTATION]: 'R',
     [OperationType.X_FINANCING]: 'M',
     [OperationType.M_FINANCING]: 'M',
+    [OperationType.INTERNATIONAL_CREDIT]: 'M',
+    [OperationType.CREDIT_REPAYMENT]: 'M',
+    [OperationType.CREDIT_REPAYMENT_BCdm]: 'M',
 });
 
 /**
@@ -86,14 +94,18 @@ export const SandBoxType = Object.freeze({
     [OperationType.NON_WAGE_INCOME]: { buyer: 'M', seller: 'E2', amount: 100 },
     [OperationType.PAYMENT]: { buyer: 'E1', seller: 'E2', amount: 100 },
     [OperationType.CREDIT]: { buyer: 'E1', seller: 'E1', amount: 100 },
-    [OperationType.REDISCOUNT]: { buyer: 'Bdm', seller: 'E3', amount: 100 },
+    [OperationType.REDISCOUNT]: { buyer: 'BCdm', seller: 'E3', amount: 100 },
     [OperationType.BANK_REPAYMENT]: { buyer: 'E1', seller: 'E2', amount: 100 }, // Modifié de R à M
-    [OperationType.INTERNATIONAL_SETTLEMENT]: { buyer: 'Bdm', seller: 'E3', amount: 100 },
-    [OperationType.INTERNATIONAL_DISCOUNT]: { buyer: 'Bdm', seller: 'E3', amount: 100 },
+    [OperationType.INTERNATIONAL_SETTLEMENT]: { buyer: 'BCdm', seller: 'E3', amount: 100 },
+    [OperationType.INTERNATIONAL_SETTLEMENT_SURPLUS]: { buyer: 'E3', seller: 'BCdm', amount: 100 },
+    [OperationType.INTERNATIONAL_DISCOUNT]: { buyer: 'BCdm', seller: 'E3', amount: 100 },
     [OperationType.EXPORTATION]: { buyer: 'Rdm', seller: 'E3', amount: 100 },
     [OperationType.IMPORTATION]: { buyer: 'E3', seller: 'Rdm', amount: 100 },
     [OperationType.X_FINANCING]: { buyer: 'Rdm', seller: 'E3', amount: 100 },
     [OperationType.M_FINANCING]: { buyer: 'E3', seller: 'Rdm', amount: 100 },
+    [OperationType.INTERNATIONAL_CREDIT]: { buyer: 'E3', seller: 'Rdm', amount: 100 },
+    [OperationType.CREDIT_REPAYMENT]: { buyer: 'BC', seller: 'E3', amount: 100 },
+    [OperationType.CREDIT_REPAYMENT_BCdm]: { buyer: 'BCdm', seller: 'Rdm', amount: 100 },
 });
 
 export const ACCOUNTS = Object.freeze({
@@ -149,7 +161,7 @@ export const AGENT_ACCOUNTS = Object.freeze({
         actif: [], // Comptes dynamiques (créances sur agents)
         passif: [] // Comptes dynamiques (dettes envers agents)
     },
-    [AGENTS.BDM]: {
+    [AGENTS.BCdm]: {
         actif: [],
         passif: []
     },

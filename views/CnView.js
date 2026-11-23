@@ -8,7 +8,7 @@ export const CYCLE_OPTIONS = [
     { value: 'profit', text: 'Cycle du profit' },
     { value: 'invest', text: "Cycle de l'investissement" },
     { value: 'amort', text: "Cycle de l'amortissement" },
-    { value: 'xstd', text: 'Exportations nettes' }
+    { value: 'xstd', text: 'Cycle international' }
 ];
 
 export class CnView extends View {

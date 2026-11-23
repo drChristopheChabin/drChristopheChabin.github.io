@@ -57,7 +57,7 @@ C'est un système à 2 entreprises où :
 - Les ménages sont une seule entité,
 - Il n'existe qu'une seule banque secondaire,
 - Il existe une banque centrale nationale,
-- Il existe une banque centrale du reste du monde (Bdm),
+- Il existe une banque centrale du reste du monde (BCdm),
 - Il existe une entreprise du reste du monde (Rdm).
 
 ## Mode d'emploi
@@ -147,6 +147,14 @@ d'investissement supplémentaire, dans ces conditions, la consommation nette pas
 ## Monnaie internationale
 En l'absence de banque centrale internationale, les échanges se font entre pays.
 À ce stade, il faut distinguer 2 groupes de pays :
-- ceux dont la monnaie est internationale (principalement les États-Unis)
-- ceux qui se servent de la monnaie internationale pour leurs échanges
+- ceux dont la monnaie est internationale (principalement les États-Unis),
+- ceux qui se servent de la monnaie internationale pour leurs échanges.
+
+Exportation
+- Il s'agit d'opérations de consommation intermédiaire qui décrémentent le stock
+
+Importation
+- Il s'agit d'opérations de consommation intermédiaire qui incrémentent le stock
+- Si le pays est importateur net, l'entreprise ou l'État doit émettre des titres auprès du reste du monde pour récupérer les fonds qui permettrons de payer via sa banque centrale le débit bancaire,
+- La vente de titre n'est pas attachée à une opération réelle, c'est un escompte raté ou un refinancement sans opération réelle nationale.
 

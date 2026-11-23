@@ -1,4 +1,4 @@
-import { OperationClassifications } from './Constants.js';
+import {OperationClassifications} from './Constants.js';
 
 export class CnFramework {
     mtE1;
@@ -29,16 +29,16 @@ export class CnFramework {
 
     getListComplete() {
         return [
-            ...this.getListProfit(),
-            ...this.getListInvest(),
-           ...this.getListAmort(),
-           /*  ...this.getListXstd(),
-            ...(this.#mInter ? this.getListMint() : this.getListMstd())*/
+            /*   ...this.getListProfit(),
+             ...this.getListInvest(),
+            ...this.getListAmort(),*/
+            ...this.getListInternat(),
+            /*    ...(this.#mInter ? this.getListMint() : this.getListMstd())*/
         ]
     }
 
     getListProfit() {
-       // console.log("profit" + this.mtE1);
+        // console.log("profit" + this.mtE1);
         return [//!*****************cycle profit***********************!/
             {
                 'operation': 'Production', 'acheteur': 'E1', 'vendeur': 'M', 'montant': this.mtE1
@@ -98,7 +98,7 @@ export class CnFramework {
                 'operation': 'RevenusSal', 'acheteur': 'M', 'vendeur': 'E2', 'montant': this.mtE2 * (1 - this.txProfit)
             }, {
                 'operation': 'Paiement', 'acheteur': 'E2', 'vendeur': 'M', 'montant': this.mtE2 * (1 - this.txProfit)
-            },{
+            }, {
                 'operation': 'Consommation',
                 'acheteur': 'M',
                 'vendeur': 'E2',
@@ -113,7 +113,7 @@ export class CnFramework {
                 'operation': 'FiCI', 'acheteur': 'E1', 'vendeur': 'E2', 'montant': this.mtE2 * (1 - this.txProfit)
             }, {
                 'operation': 'Paiement', 'acheteur': 'E2', 'vendeur': 'E1', 'montant': this.mtE2 * (1 - this.txProfit)
-            },  {
+            }, {
                 'operation': 'AchatTitres', 'acheteur': 'M', 'vendeur': 'E1', 'montant': this.mtE2 * (1 - this.txProfit)
             }, {
                 'operation': 'Credit', 'acheteur': 'M', 'vendeur': 'E1', 'montant': this.mtE2 * (1 - this.txProfit)
@@ -239,12 +239,12 @@ export class CnFramework {
                 'operation': 'RemboursementBq', 'acheteur': 'E1', 'vendeur': 'E1', 'montant': this.mtAmortit
             },*/{
                 'operation': 'RemboursementBq', 'acheteur': 'E2', 'vendeur': 'E2', 'montant': this.mtAmortit * 2
-            },  {
+            }, {
                 'operation': 'Credit',
                 'acheteur': 'E2',
                 'vendeur': 'E2',
                 'montant': this.mtAmortit * (1 - this.txProfit) * -1
-            },{
+            }, {
                 'operation': 'RemboursementBq', 'acheteur': 'M', 'vendeur': 'M', 'montant': this.mtAmortit * -1
             },// // Production duale E1
             {
@@ -288,6 +288,14 @@ export class CnFramework {
         ]
     }
 
+    getListInternat() {
+        return [
+            ...this.getListXstd(),
+            ...this.getListMstd(),
+            ...this.getListSoldeInt(),
+        ]
+    }
+
     /*
     * Exportations nettes
      */
@@ -296,21 +304,15 @@ export class CnFramework {
 
         const list = [
             {
-                'operation': 'ConsommationIntermediaire',
+                'operation': 'Exportation',
                 'acheteur': 'Rdm',
                 'vendeur': 'E3',
                 'montant': this.xport * (1 - this.txProfit)
             }, {
-                'operation': 'FiCI', 'acheteur': 'E3', 'vendeur': 'Rdm', 'montant': this.xport * (1 - this.txProfit)
+                'operation': 'FiX', 'acheteur': 'Rdm', 'vendeur': 'E3', 'montant': this.xport * (1 - this.txProfit)
             }
+
         ];
-
-        if (this.#delta < 0) {
-            list.push({
-                'operation': 'Credit', 'acheteur': 'Rdm', 'vendeur': 'E3', 'montant': Math.abs(this.#delta)
-            });
-        }
-
         return list;
     }
 
@@ -320,29 +322,57 @@ export class CnFramework {
     getListMstd() {
         if (this.mport <= 0) return [];
         const list = [{
-            'operation': 'ConsommationIntermediaire',
+            'operation': 'Importation',
             'acheteur': 'E3',
             'vendeur': 'Rdm',
             'montant': this.mport * (1 - this.txProfit)
         }, {
-            'operation': 'FiCI', 'acheteur': 'Rdm', 'vendeur': 'E3', 'montant': this.mport * (1 - this.txProfit)
-        }, {
-            'operation': 'Credit', 'acheteur': 'E3', 'vendeur': 'Rdm', 'montant': this.mport
+            'operation': 'FiM', 'acheteur': 'E3', 'vendeur': 'Rdm', 'montant': this.mport * (1 - this.txProfit)
         },
         ]
-
-        if (this.#delta > 0) {
-            list.push(
-                {
-                    'operation': 'FiReglementInternational', 'acheteur': 'Bdm', 'vendeur': 'E3', 'montant': this.#delta
-                },
-            )
-        }
         return list;
     }
 
-    getListXint() {
-        return []
+    getListSoldeInt() {
+        const list = [];
+        if (this.#delta < 0 && this.#mInter === true) {
+            list.push({
+                'operation': 'AchatTitres', 'acheteur': 'E3', 'vendeur': 'Rdm', 'montant': Math.abs(this.#delta)
+                },
+                {
+                    'operation': 'FiReglementInternationalExcedent', 'acheteur': 'E3', 'vendeur': 'BCdm', 'montant': Math.abs(this.#delta)
+                },{
+                    'operation': 'RemboursementBq', 'acheteur': 'Rdm', 'vendeur': 'Rdm', 'montant': this.#delta*-1
+                },{
+                'operation': 'RembCredit', 'acheteur': 'BC', 'vendeur': 'E3', 'montant': this.#delta*-1
+                },{
+                    'operation': 'RembCreditBCdm', 'acheteur': 'BC', 'vendeur': 'BC', 'montant': this.#delta*-1
+                },
+
+            );
+        }
+        if (this.#delta > 0 && this.#mInter===false) {
+            list.push(
+                {
+                    'operation': 'AchatTitres', 'acheteur': 'Rdm', 'vendeur': 'E3', 'montant': this.#delta
+                },
+                {
+                    'operation': 'FiReglementInternational', 'acheteur': 'BCdm', 'vendeur': 'E3', 'montant': this.#delta
+                }, {
+                    'operation': 'RemboursementBq', 'acheteur': 'E3', 'vendeur': 'E3', 'montant': this.#delta
+                },{
+                    'operation': 'RembCredit', 'acheteur': 'E3', 'vendeur': 'BC', 'montant': this.#delta
+                },{
+                    'operation': 'RembCreditBCdm', 'acheteur': 'BC', 'vendeur': 'BC', 'montant': this.#delta
+                }
+            );
+        }
+        if (this.#delta > 0 && this.#mInter === true) {
+            list.push({
+                'operation': 'FIEscompteInternational', 'acheteur': 'BCdm', 'vendeur': 'E3', 'montant': this.#delta
+            });
+        }
+        return list;
     }
 
     /*
@@ -364,7 +394,7 @@ export class CnFramework {
         if (this.#delta > 0) {
             list.push(
                 {
-                    'operation': 'FIEscompteInternational', 'acheteur': 'Bdm', 'vendeur': 'E3', 'montant': this.#delta
+                    'operation': 'FIEscompteInternational', 'acheteur': 'BCdm', 'vendeur': 'E3', 'montant': this.#delta
                 },
             )
         }
