@@ -132,6 +132,34 @@ export class CnRenderer {
     }
 
     /**
+     * Génère le tableau de la Balance des paiements
+     * @param {Array<[string, number]>} lignes - Lignes [libellé, valeur]
+     */
+    generateBalancePaiements(lignes) {
+        const table = this.#createElement('table', 'tableaux balise');
+        const thead = this.#createElement('thead', 'bg-light');
+        const tbody = this.#createElement('tbody');
+
+        const headerRow = this.#createElement('tr', 'entreprise');
+        const headerCell = this.#createCell('th', 'Balance des paiements');
+        headerCell.setAttribute('colspan', '2');
+        headerRow.appendChild(headerCell);
+        thead.appendChild(headerRow);
+
+        lignes.forEach(([libelle, valeur]) => {
+            const row = this.#createElement('tr');
+            row.appendChild(this.#createCell('td', libelle, 'key'));
+            row.appendChild(this.#createCell('td', valeur, valeur !== 0 ? 'value' : ''));
+            tbody.appendChild(row);
+        });
+
+        table.append(tbody, thead);
+        this.tablesContainer.appendChild(table);
+
+        return table;
+    }
+
+    /**
      * Génère un tableau pour un agent
      */
     generateAgentTable(agent, columns = 4) {

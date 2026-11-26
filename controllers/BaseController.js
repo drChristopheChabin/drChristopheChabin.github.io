@@ -94,6 +94,7 @@ export class BaseController {
         return {
             agents: this.model.getOperationsAgents,
             comptes: this.model.getOperationsComptes,
+            balancePaiements: this.model.getBalancePaiements,
             operations: this.model.getLesOperations,
             operationTypes: this.model.getLesTypes
         };

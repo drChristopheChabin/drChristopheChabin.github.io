@@ -156,6 +156,9 @@ export class View {
             this.displayTEE(results.comptes);
             this.displayTOF(results.comptes);
         }
+        if (results.balancePaiements) {
+            this.cnRenderer.generateBalancePaiements(results.balancePaiements);
+        }
         if (results.operations) {
             this.displayOperations(results.operations, results.operationTypes);
         }

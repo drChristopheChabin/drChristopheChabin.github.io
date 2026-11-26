@@ -361,6 +361,40 @@ export class Model {
         return this.#params.mode === 'cycles' ? [...operations].reverse() : operations;
     }
 
+    /**
+     * Balance des paiements, calculée à partir du solde extérieur (delta = M - X)
+     * et du compte Bdm à l'actif de la BCdm.
+     * Indisponible (null) en mode 'sandbox' (pas de solde extérieur).
+     * @returns {Array<[string, number]>|null} Lignes [libellé, valeur]
+     */
+    get getBalancePaiements() {
+        if (typeof this.model?.getDelta !== 'number') return null;
+
+        const delta = this.model.getDelta;
+        const bdmActif = this.#operation.find('BCdm')?.getactif?.Bdm ?? 0;
+
+        const balanceCommerciale = delta * -1;
+        const soldeServices = 0;
+        const soldeBiensServices = delta * -1;
+        const transferts = 0;
+        const balanceCourante = delta * -1;
+        const mouvementsCapitaux = delta - bdmActif;
+        // Une baisse des réserves est une ressource (+) : la balance est équilibrée
+        const variationReserves = (balanceCourante + mouvementsCapitaux) * -1;
+        const erreursOmissions = (balanceCourante + mouvementsCapitaux + variationReserves) * -1;
+
+        return [
+            ['Balance commerciale', balanceCommerciale],
+            ['+ Solde des services', soldeServices],
+            ['= Solde des biens et services', soldeBiensServices],
+            ['+ Transferts', transferts],
+            ['= Balance courante X-M', balanceCourante],
+            ['+ Mouvements de capitaux', mouvementsCapitaux],
+            ['= Variation des réserves M-X', variationReserves],
+            ['Erreurs et omissions', erreursOmissions]
+        ];
+    }
+
     get getLesTypes() {
         return this.model.getTypes;
     }

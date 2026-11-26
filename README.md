@@ -70,6 +70,16 @@ Certaines données sont enregistrées par défaut.
 + Le bouton RAZ efface toutes les données,
 + Le bouton Pas à Pas execute les opérations les unes aprés les autres.
   (il n'y a pas de retour arrière pour l'instant.)
+
+Sous le TOF, la **Balance des paiements** est calculée à partir du solde extérieur
+delta = M - X (importations - exportations) :
++ Balance commerciale = -delta, + Solde des services = 0, = Solde des biens et services = -delta,
++ \+ Transferts = 0, = Balance courante X-M = -delta,
++ \+ Mouvements de capitaux = delta - (Bdm à l'actif de la BCdm),
++ = Variation des réserves M-X = -(Balance courante + Mouvements de capitaux)
+  (une baisse des réserves est une ressource, comptée en +),
++ Erreurs et omissions = -(Balance courante + Mouvements de capitaux + Variation des réserves),
+  de sorte que la somme des postes est nulle.
 ### Menu cycle
 Le bouton "choisir un paramétrage" donne accès à un formulaire.
 

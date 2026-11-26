@@ -29,11 +29,11 @@ export class CnFramework {
 
     getListComplete() {
         return [
-            /*   ...this.getListProfit(),
+            ...this.getListProfit(),
              ...this.getListInvest(),
-            ...this.getListAmort(),*/
+            ...this.getListAmort(),
             ...this.getListInternat(),
-            /*    ...(this.#mInter ? this.getListMint() : this.getListMstd())*/
+           // ...(this.#mInter ? this.getListMint() : this.getListMstd())
         ]
     }
 
@@ -401,6 +401,14 @@ export class CnFramework {
         return list;
     }
 
+
+    /**
+     * Solde extérieur : importations - exportations (M - X)
+     * @returns {number}
+     */
+    get getDelta() {
+        return this.#delta ?? 0;
+    }
 
     get getTypes() {
         return OperationClassifications;
